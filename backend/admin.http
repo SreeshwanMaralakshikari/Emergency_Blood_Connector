@@ -1,0 +1,76 @@
+### 
+GET http://localhost:5000/admin-api/
+
+### Get all users
+GET http://localhost:5000/admin-api/users
+
+### Get all donors
+GET http://localhost:5000/admin-api/donors
+
+### Get all requesters
+GET http://localhost:5000/admin-api/requesters
+
+### Get user details
+POST http://localhost:5000/admin-api/user-details
+Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+{
+  "userId": "6a2d5e16330ee78738b67c41"
+}
+
+### Activate/Deactivate User
+PATCH http://localhost:5000/admin-api/user-status
+Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+{
+  "userId": "6a2d5e16330ee78738b67c41",
+  "isUserActive": true
+}
+
+
+
+### Get All Requests
+GET http://localhost:5000/admin-api/requests
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+### Get Open Requests
+GET http://localhost:5000/admin-api/open-requests
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+### Get Fulfilled Requests
+GET http://localhost:5000/admin-api/fulfilled-requests
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+### Get Deleted Requests
+GET http://localhost:5000/admin-api/deleted-requests
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+### Get Request Details
+POST http://localhost:5000/admin-api/request-details
+Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+{
+  "requestNumber": "REQ-2026-00010"
+}
+
+### Force Close Request
+PATCH http://localhost:5000/admin-api/force-close-request
+Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+{
+  "requestNumber": "REQ-2026-00010"
+}
+
+
+### Admin Dashboard
+GET http://localhost:5000/admin-api/dashboard
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc
+
+
+### Admin Statistics
+GET http://localhost:5000/admin-api/statistics
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzc4NjI1LCJleHAiOjE3ODE5ODM0MjV9.ypdTe0PNg24qnKHxNETyFeIWUrZmAMtbrxHvNJ_95Oc

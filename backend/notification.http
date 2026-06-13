@@ -1,0 +1,6 @@
+###
+GET http://localhost:5000/notification-api
+
+### 
+GET http://localhost:5000/notification-api/my-notifications
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUyMzMzMGVlNzg3MzhiNjdjNDIiLCJlbWFpbCI6ImRvbm9yMkB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MTM2NTY5MCwiZXhwIjoxNzgxOTcwNDkwfQ.S_Jes48TGUejOsH7M-ufI_5E7YdeGBX04gNJIi29J5o

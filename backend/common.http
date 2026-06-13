@@ -1,0 +1,48 @@
+### Testing Common API
+GET http://localhost:5000/auth
+
+### Register Requester
+POST http://localhost:5000/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Hospital",
+  "lastName": "Staff",
+  "email": "requester2@test.com",
+  "password": "223456",
+  "phoneNumber": "9000000002",
+  "bloodGroup": "O+",
+  "state": "Telangana",
+  "role": "REQUESTER"
+}
+
+### Register Donor
+POST http://localhost:5000/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Donor",
+  "lastName": "Four",
+  "email": "donor13@test.com",
+  "password": "1323456",
+  "phoneNumber": "9001300002",
+  "bloodGroup": "O-",
+  "state": "Telangana",
+  "role": "DONOR"
+}
+
+### Login
+POST http://localhost:5000/auth/login
+Content-Type: application/json
+
+{
+  "email":"admin@test.com",
+  "password":"123456"
+}
+
+### Check Auth
+GET http://localhost:5000/auth/check-auth
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzY5MDc4LCJleHAiOjE3ODE5NzM4Nzh9.hsXRbZ8laAo_PrmHMZnAnfmRr3LTzIAmlqlwB26y8qo
+
+### Logout
+GET http://localhost:5000/auth/logout
