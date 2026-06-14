@@ -8,8 +8,6 @@ import { requestApp } from "./APIs/RequestAPI.js";
 import { donorApp }
 from "./APIs/DonorAPI.js";
 import { notificationApp }from "./APIs/NotificationApi.js";
-import { adminApp }from "./APIs/AdminAPI.js";
-
 
 config();
 
@@ -33,11 +31,11 @@ app.use(
   })
 );
 
-app.use("/auth",commonApp);
-app.use("/request-api",requestApp);
-app.use("/donor-api",donorApp);
+app.use("/auth", commonApp);
+app.use("/request-api", requestApp);
+app.use("/donor-api", donorApp);
 app.use("/notification-api",notificationApp);
-app.use("/admin-api",adminApp);
+
 
 //connect to db
 const connectDB = async () => {

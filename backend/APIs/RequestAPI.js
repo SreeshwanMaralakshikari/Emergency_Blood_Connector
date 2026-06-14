@@ -124,6 +124,7 @@ requestApp.get(
       const requestsList =
         await BloodRequestModel.find({
           status: "OPEN",
+          status: { $ne: "DELETED" }
         }).sort({
           priorityScore: -1,
           createdAt: -1,
@@ -254,9 +255,6 @@ requestApp.put(
       const request =
         await BloodRequestModel.findOne({
           requestNumber,
-          status: {
-            $ne: "DELETED",
-          },
         });
 
       if (!request) {
@@ -526,6 +524,7 @@ requestApp.patch(
   }
 );
 
+
 // REQUESTER DASHBOARD
 requestApp.get(
   "/dashboard",
@@ -598,8 +597,6 @@ requestApp.get(
     }
   }
 );
-
-
 
 requestApp.get("/", (req, res) => {
   res.json({
