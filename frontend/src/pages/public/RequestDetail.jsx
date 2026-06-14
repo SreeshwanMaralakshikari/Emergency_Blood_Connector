@@ -89,10 +89,10 @@ export default function RequestDetail() {
   // Determine donor's relationship to this request
   const userId           = user?.id || user?._id;
   const hasAccepted      = req.acceptedDonors?.some(
-    (d) => String(d._id || d) === String(userId)
+    (d) => String(d.donorId || d) === String(userId)
   );
   const hasCompleted     = req.completedDonors?.some(
-    (d) => String(d._id || d) === String(userId)
+    (d) => String(d.donorId || d) === String(userId)
   );
   const isOwner          = String(req.requestCreatedBy?._id || req.requestCreatedBy) === String(userId);
   const isOpen           = req.status === "OPEN";
@@ -102,7 +102,7 @@ export default function RequestDetail() {
   const handleAccept = async () => {
     try {
       setActionLoading("accept");
-      await axiosInstance.patch("/donor-api/accept-request", { requestNumber: req.requestNumber });
+      await axiosInstance.put("/donor-api/accept-request", { requestNumber: req.requestNumber });
       toast.success("Request accepted! Head to the hospital and donate.");
       fetchRequest();
     } catch (err) {

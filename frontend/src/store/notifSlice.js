@@ -10,7 +10,7 @@ export const fetchUnreadCount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/notification-api/unread-count");
-      return res.data?.payload?.unreadCount ?? 0;
+      return res.data?.unreadCount ?? 0;
     } catch {
       return rejectWithValue(0);
     }

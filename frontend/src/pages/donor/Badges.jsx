@@ -3,37 +3,31 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import {
-  pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
+  pageBackground, pageWrapper, pageTitleClass, bodyText,
   loadingClass, errorClass, emptyStateClass,
   badgeGrid, badgeCard, badgeCardEarned, badgeName,
 } from "../../styles/common";
 
 // Badge icon map — domain-relevant icons for each badge type
 const BADGE_ICONS = {
-  "First Donation":    "🩸",
-  "Five Donations":    "⭐",
-  "Ten Donations":     "🌟",
-  "Fifty Points":      "🏅",
-  "Hundred Points":    "🏆",
-  "Twenty Donations":  "💪",
-  "Diamond Donor":     "💎",
-  "Lifesaver":         "❤️",
-  "Emergency Hero":    "🚨",
+  "First Donation":  "🩸",
+  "5 Donations":     "⭐",
+  "10 Donations":    "🌟",
+  "25 Donations":    "💪",
+  "50 Donations":    "💎",
+  "100 Points":      "🏅",
+  "500 Points":      "🏆",
+  "1000 Points":     "👑",
 };
 
 const DEFAULT_ICON = "🎖️";
 
-function BadgeCard({ badge, earned }) {
-  const icon = BADGE_ICONS[badge.name] || DEFAULT_ICON;
+function BadgeCard({ name, earned }) {
+  const icon = BADGE_ICONS[name] || DEFAULT_ICON;
   return (
     <div className={earned ? badgeCardEarned : badgeCard}>
-      <span className="text-3xl" role="img" aria-label={badge.name}>{icon}</span>
-      <p className={badgeName}>{badge.name}</p>
-      {badge.description && (
-        <p className="text-[0.7rem] text-[#9e9e9e] text-center leading-relaxed">
-          {badge.description}
-        </p>
-      )}
+      <span className="text-3xl" role="img" aria-label={name}>{icon}</span>
+      <p className={badgeName}>{name}</p>
       {earned ? (
         <span className="text-[10px] font-bold text-[#b45309] bg-[#b45309]/10
                          px-2 py-0.5 rounded-full uppercase tracking-wide mt-1">
@@ -49,6 +43,12 @@ function BadgeCard({ badge, earned }) {
   );
 }
 
+// All possible badges in order — used to show locked ones too
+const ALL_BADGES = [
+  "First Donation", "5 Donations", "10 Donations", "25 Donations", "50 Donations",
+  "100 Points", "500 Points", "1000 Points",
+];
+
 export default function Badges() {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +57,7 @@ export default function Badges() {
   useEffect(() => {
     const load = async () => {
       try {
+        // Backend sends: { badges: [...earned badge names], donationsCount, totalPoints, donorLevel }
         const res = await axiosInstance.get("/donor-api/badges");
         setData(res.data?.payload);
       } catch (err) {
@@ -68,13 +69,9 @@ export default function Badges() {
     load();
   }, []);
 
-  const earned   = data?.earnedBadges   || [];
-  const all      = data?.allBadges      || [];
-  // Build a set of earned names for quick lookup
-  const earnedNames = new Set(earned.map((b) => b.name || b));
-
-  // If API returns flat arrays, use them; if only earnedBadges, show those
-  const displayAll = all.length > 0 ? all : earned;
+  // Backend sends flat array of earned badge names under 'badges'
+  const earnedSet = new Set(data?.badges || []);
+  const earnedCount = earnedSet.size;
 
   return (
     <div className={pageBackground}>
@@ -95,15 +92,15 @@ export default function Badges() {
         {!loading && (
           <div className="bg-[#f4f4f4] rounded-xl p-5 mb-8 flex items-center gap-4">
             <p className="text-3xl font-bold text-[#1a1a1a] tracking-tight">
-              {earned.length}
+              {earnedCount}
             </p>
             <div>
               <p className="text-sm font-semibold text-[#1a1a1a]">
-                badge{earned.length !== 1 ? "s" : ""} earned
+                badge{earnedCount !== 1 ? "s" : ""} earned
               </p>
-              {all.length > earned.length && (
+              {ALL_BADGES.length > earnedCount && (
                 <p className="text-xs text-[#9e9e9e]">
-                  {all.length - earned.length} more to unlock
+                  {ALL_BADGES.length - earnedCount} more to unlock
                 </p>
               )}
             </div>
@@ -113,36 +110,11 @@ export default function Badges() {
         {loading && <p className={loadingClass}>Loading badges…</p>}
         {error   && <div className={errorClass}>{error}</div>}
 
-        {!loading && !error && displayAll.length === 0 && (
-          <p className={emptyStateClass}>No badges available yet. Keep donating!</p>
-        )}
-
-        {/* Badge grid */}
-        {!loading && displayAll.length > 0 && (
+        {/* Badge grid — show all badges, earned ones highlighted */}
+        {!loading && !error && (
           <div className={badgeGrid}>
-            {displayAll.map((badge, i) => {
-              const name    = badge.name || badge;
-              const isEarned = earnedNames.has(name);
-              return (
-                <BadgeCard
-                  key={i}
-                  badge={typeof badge === "string" ? { name: badge } : badge}
-                  earned={isEarned}
-                />
-              );
-            })}
-          </div>
-        )}
-
-        {/* If API only returned earned badges (no allBadges), show them */}
-        {!loading && all.length === 0 && earned.length > 0 && (
-          <div className={badgeGrid}>
-            {earned.map((badge, i) => (
-              <BadgeCard
-                key={i}
-                badge={typeof badge === "string" ? { name: badge } : badge}
-                earned
-              />
+            {ALL_BADGES.map((name) => (
+              <BadgeCard key={name} name={name} earned={earnedSet.has(name)} />
             ))}
           </div>
         )}

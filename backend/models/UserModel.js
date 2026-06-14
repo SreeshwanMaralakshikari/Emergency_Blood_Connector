@@ -1,145 +1,109 @@
-import { Schema, model } from "mongoose";
+import {Schema,model} from 'mongoose'
 
-const userSchema = new Schema(
-  {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
+//Create User Schema
+const userSchema=new Schema({
+    firstName:{
+        type:String,
+        required:[true,"First Name is required"],
+        trim:true
     },
-
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
+    lastName:{
+        type:String,
+        required:[true,"Last Name is required"],
+        trim:true
     },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
+    email:{
+        type:String,
+        required:[true,"Email is required"],
+        unique:true,
+        lowercase:true,
+        trim:true
     },
-
-    password: {
-      type: String,
-      required: true,
+    password:{
+        type:String,
+        required:[true,"Password is required"]
     },
-
-    phoneNumber: {
-      type: String,
-      required: true,
-      unique: true,
+    phoneNumber:{
+        type:String,
+        required:[true,"Phone Number is required"],
+        unique:true
     },
-
-    bloodGroup: {
-      type: String,
-      required: true,
-      enum: [
-        "O+",
-        "O-",
-        "A+",
-        "A-",
-        "B+",
-        "B-",
-        "AB+",
-        "AB-",
-      ],
+    bloodGroup:{
+        type:String,
+        required:[true,"Blood Group is required"],
+        enum:["O+","O-","A+","A-","B+","B-","AB+","AB-"]
     },
-
-    state: {
-      type: String,
-      required: true,
+    state:{
+        type:String,
+        required:[true,"State is required"]
     },
-
-    role: {
-      type: String,
-      enum: ["DONOR", "REQUESTER", "ADMIN"],
-      default: "DONOR",
+    role:{
+        type:String,
+        enum:["DONOR","REQUESTER","ADMIN"],
+        default:"DONOR"
     },
-
-    isAvailable: {
-      type: Boolean,
-      default: true,
+    isAvailable:{
+        type:Boolean,
+        default:true
     },
-
-    profileImageUrl: {
-      type: String,
-      default: "",
+    profileImageUrl:{
+        type:String,
+        default:""
     },
-
-    donationsCount: {
-      type: Number,
-      default: 0,
+    donationsCount:{
+        type:Number,
+        default:0
     },
-
-    totalPoints: {
-      type: Number,
-      default: 0,
+    totalPoints:{
+        type:Number,
+        default:0
     },
-
-    donorLevel: {
-      type: String,
-      enum: [
-        "Iron",
-        "Bronze",
-        "Silver",
-        "Gold",
-        "Platinum",
-        "Diamond"
-      ],
-      default: "Iron",
+    donorLevel:{
+        type:String,
+        enum:["Iron","Bronze","Silver","Gold","Platinum","Diamond"],
+        default:"Iron"
     },
-
-    badges: {
-      type: [String],
-      default: [],
+    badges:{
+        type:[String],
+        default:[]
     },
-
-    notifications: {
-      type: [String],
-      default: [],
+    notifications:{
+        type:[String],
+        default:[]
     },
-
-    lastDonationDate: {
-      type: Date,
-      default: null,
+    lastDonationDate:{
+        type:Date,
+        default:null
     },
-
-    nextEligibleDonationDate: {
-      type: Date,
-      default: null,
+    nextEligibleDonationDate:{
+        type:Date,
+        default:null
     },
-
-    isUserActive: {
-      type: Boolean,
-      default: true,
+    isUserActive:{
+        type:Boolean,
+        default:true
     },
-    loginHistory: {
-        type: [Date],
-        default: []
+    loginHistory:{
+        type:[Date],
+        default:[]
     },
-    lastLogin: {
-        type: Date,
-        default: null
+    lastLogin:{
+        type:Date,
+        default:null
     },
-    availabilityUpdatedAt: {
-        type: Date,
-        default: null
+    availabilityUpdatedAt:{
+        type:Date,
+        default:null
     }
-  },
-  {
-    timestamps: true,
-  }
-);
-
-userSchema.index({
-  role: 1,
-  isAvailable: 1,
-  state: 1,
-  bloodGroup: 1,
+},
+{
+    timestamps:true,
+    versionKey:false,
+    strict:"throw"
 });
 
+//index for donor search queries
+userSchema.index({role:1,isAvailable:1,state:1,bloodGroup:1});
 
-export const UserModel = model("user", userSchema);
+//Create User Model
+export const UserModel=model("user",userSchema);

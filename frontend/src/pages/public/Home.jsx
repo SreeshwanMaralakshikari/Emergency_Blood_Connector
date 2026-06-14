@@ -6,14 +6,11 @@ import { selectIsAuth, selectRole } from "../../store/authSlice";
 import {
   primaryBtn,
   secondaryBtn,
-  cardClass,
   headingClass,
   bodyText,
   mutedText,
   divider,
   bloodGroupBadge,
-  alertRed,
-  alertBlack,
 } from "../../styles/common";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];

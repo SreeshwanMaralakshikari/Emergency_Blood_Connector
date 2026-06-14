@@ -10,7 +10,7 @@ import {
   getAlertClass, getStatusClass,
 } from "../../styles/common";
 
-// ── Simple horizontal bar chart ──────────────────────────
+// ── Simple horizontal bar chart ───────────────────────────────
 function BarChart({ rows, colorClass, total }) {
   if (!rows || rows.length === 0) return <p className="text-sm text-[#9e9e9e]">No data.</p>;
   const max = Math.max(...rows.map((r) => r.count), 1);
@@ -18,7 +18,7 @@ function BarChart({ rows, colorClass, total }) {
   return (
     <div className="flex flex-col gap-3">
       {rows.map((row) => {
-        const pct     = Math.round((row.count / max) * 100);
+        const pct      = Math.round((row.count / max) * 100);
         const sharePct = total ? Math.round((row.count / total) * 100) : null;
         return (
           <div key={row.label} className="flex flex-col gap-1">
@@ -41,7 +41,7 @@ function BarChart({ rows, colorClass, total }) {
   );
 }
 
-// ── Badge-style distribution (for alert levels / statuses) ──
+// ── Badge-style distribution (for alert levels / statuses) ────
 function BadgeDistribution({ rows, getBadgeClass }) {
   if (!rows || rows.length === 0) return <p className="text-sm text-[#9e9e9e]">No data.</p>;
   const total = rows.reduce((s, r) => s + r.count, 0);
@@ -69,16 +69,16 @@ function BadgeDistribution({ rows, getBadgeClass }) {
   );
 }
 
-// Helper — normalise API response which may be array of objects or key-value maps
+// Normalise API response — backend returns array of {_id, count}
+// Convert to {label, count} for consistent rendering
 function toRows(data) {
   if (!data) return [];
   if (Array.isArray(data)) {
     return data.map((item) => ({
-      label: item._id || item.label || item.name || String(item),
-      count: item.count ?? item.value ?? 0,
+      label: item._id || item.label || String(item),
+      count: item.count ?? 0,
     })).sort((a, b) => b.count - a.count);
   }
-  // Object shape: { "A+": 12, "B+": 8, ... }
   return Object.entries(data)
     .map(([label, count]) => ({ label, count: Number(count) }))
     .sort((a, b) => b.count - a.count);
@@ -106,13 +106,14 @@ export default function AdminStatistics() {
   if (loading) return <div className={pageBackground}><p className={`${loadingClass} pt-32`}>Loading statistics…</p></div>;
   if (error)   return <div className={pageBackground}><div className={`${errorClass} max-w-xl mx-auto mt-20`}>{error}</div></div>;
 
-  const bloodGroupRows  = toRows(stats?.bloodGroupDistribution);
-  const alertRows       = toRows(stats?.alertLevelDistribution);
-  const statusRows      = toRows(stats?.requestStatusDistribution);
-  const stateRows       = toRows(stats?.stateDistribution);
+  // Backend sends: bloodGroupStats, stateStats, alertLevelStats, requestStatusStats
+  const bloodGroupRows = toRows(stats?.bloodGroupStats);
+  const alertRows      = toRows(stats?.alertLevelStats);
+  const statusRows     = toRows(stats?.requestStatusStats);
+  const stateRows      = toRows(stats?.stateStats);
 
-  const totalBG     = bloodGroupRows.reduce((s, r) => s + r.count, 0);
-  const totalState  = stateRows.reduce((s, r) => s + r.count, 0);
+  const totalBG    = bloodGroupRows.reduce((s, r) => s + r.count, 0);
+  const totalState = stateRows.reduce((s, r) => s + r.count, 0);
 
   return (
     <div className={pageBackground}>
@@ -189,16 +190,13 @@ export default function AdminStatistics() {
         {/* ── State-wise user distribution ─────── */}
         <section className="mb-10">
           <h2 className={`${sectionTitle} mb-2`}>State-wise user distribution</h2>
-          <p className={`${bodyText} mb-6`}>
-            Top states by number of registered users.
-          </p>
+          <p className={`${bodyText} mb-6`}>Top states by number of registered users.</p>
           <div className="bg-[#f4f4f4] rounded-xl p-6">
-            {/* Top 3 highlight */}
             {stateRows.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 {stateRows.slice(0, 3).map((r, i) => (
                   <div key={r.label} className="bg-white rounded-xl p-4 flex items-center gap-3">
-                    <span className="text-2xl">{["🥇", "🥈", "🥉"][i]}</span>
+                    <span className="text-2xl">{["🥇","🥈","🥉"][i]}</span>
                     <div>
                       <p className="text-sm font-bold text-[#1a1a1a]">{r.label}</p>
                       <p className="text-xs text-[#9e9e9e]">

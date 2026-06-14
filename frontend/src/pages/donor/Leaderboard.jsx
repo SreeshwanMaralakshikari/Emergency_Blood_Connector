@@ -10,9 +10,8 @@ import {
   loadingClass, errorClass, emptyStateClass,
   leaderboardList, leaderboardRow, leaderboardRowMe,
   leaderboardRank, leaderboardRankTop,
-  leaderboardName, leaderboardScore, leaderboardMeta,
-  getLevelClass, bloodGroupBadge, pointsPill, divider,
-  sectionHeader, sectionTitle,
+  leaderboardName, leaderboardScore,
+  getLevelClass, pointsPill, divider,
 } from "../../styles/common";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -29,7 +28,8 @@ function LeaderRow({ entry, isMe, position }) {
       {/* Name + meta */}
       <div className="flex flex-col gap-0.5 flex-1 px-3">
         <span className={leaderboardName}>
-          {entry.firstName} {entry.lastName}
+          {/* Backend sends donorName as combined string */}
+          {entry.donorName}
           {isMe && (
             <span className="ml-2 text-[10px] font-bold text-[#c0152a] bg-[#c0152a]/10
                              px-2 py-0.5 rounded-full uppercase tracking-wide">
@@ -41,13 +41,6 @@ function LeaderRow({ entry, isMe, position }) {
           {entry.donorLevel && (
             <span className={getLevelClass(entry.donorLevel)}>{entry.donorLevel}</span>
           )}
-          {entry.bloodGroup && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full
-                             bg-[#c0152a]/8 text-[#960f20] border border-[#c0152a]/15">
-              {entry.bloodGroup}
-            </span>
-          )}
-          <span className={mutedText}>{entry.state}</span>
         </div>
       </div>
 
@@ -63,12 +56,12 @@ function LeaderRow({ entry, isMe, position }) {
 }
 
 export default function Leaderboard() {
-  const user                    = useSelector(selectUser);
-  const isAuth                  = useSelector(selectIsAuth);
-  const [leaders, setLeaders]   = useState([]);
-  const [myRank, setMyRank]     = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState("");
+  const user                  = useSelector(selectUser);
+  const isAuth                = useSelector(selectIsAuth);
+  const [leaders, setLeaders] = useState([]);
+  const [myRank, setMyRank]   = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -88,6 +81,7 @@ export default function Leaderboard() {
     load();
   }, [isAuth]);
 
+  // Backend sends donorId (not _id) so use that for the isMe check
   const userId = user?.id || user?._id;
 
   return (
@@ -140,10 +134,10 @@ export default function Leaderboard() {
           <div className={leaderboardList}>
             {leaders.map((entry, i) => (
               <LeaderRow
-                key={entry._id}
+                key={entry.donorId}
                 entry={entry}
                 position={i + 1}
-                isMe={String(entry._id) === String(userId)}
+                isMe={String(entry.donorId) === String(userId)}
               />
             ))}
           </div>
