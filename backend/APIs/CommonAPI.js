@@ -85,7 +85,7 @@ commonApp.post("/login",async(req,res,next)=>{
         // set HTTP-only cookie
         res.cookie("token",signedToken,{
             httpOnly:true,
-            sameSite:"lax",
+            sameSite:"none",
             maxAge:7*24*60*60*1000 // 7 days
         });
         const userObj=dbUser.toObject();
