@@ -3,8 +3,11 @@ import jwt from 'jsonwebtoken'
 //factory function — returns middleware for allowed roles
 export const verifyToken=(...allowedRoles)=>{
     return (req,res,next)=>{
-        //get token from cookie
-        const token=req.cookies.token;
+        //get token from Authorization header (Bearer <token>)
+        const authHeader=req.headers.authorization;
+        const token=authHeader && authHeader.startsWith("Bearer ")
+            ? authHeader.split(" ")[1]
+            : null;
 
         if(!token)
         {
