@@ -83,10 +83,11 @@ commonApp.post("/login",async(req,res,next)=>{
             {expiresIn:"7d"}
         );
         // set HTTP-only cookie
-        res.cookie("token",signedToken,{
-            httpOnly:true,
-            sameSite:"none",
-            maxAge:7*24*60*60*1000 // 7 days
+        res.cookie("token", signedToken, {
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+            maxAge: 7*24*60*60*1000
         });
         const userObj=dbUser.toObject();
         delete userObj.password;
@@ -119,7 +120,11 @@ commonApp.get("/check-auth",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,r
 
 // Logout — GET /auth/logout
 commonApp.get("/logout",(req,res)=>{
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+    });
     res.status(200).json({message:"Logout Successful"});
 });
 
