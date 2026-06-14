@@ -15,13 +15,6 @@ import {
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-const STATS = [
-  { value: "36", label: "API endpoints" },
-  { value: "3", label: "Roles supported" },
-  { value: "6", label: "Donor levels" },
-  { value: "4", label: "Alert levels" },
-];
-
 const HOW_IT_WORKS = [
   {
     step: "01",
@@ -78,18 +71,6 @@ export default function Home() {
               View open requests
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── Stats strip ───────────────────────────────── */}
-      <section className="border-y border-[#e4e4e4] bg-white">
-        <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6">
-          {STATS.map((s) => (
-            <div key={s.label} className="flex flex-col gap-0.5">
-              <span className="text-3xl font-bold text-[#c0152a] tracking-tight">{s.value}</span>
-              <span className="text-xs font-semibold text-[#9e9e9e] uppercase tracking-widest">{s.label}</span>
-            </div>
-          ))}
         </div>
       </section>
 
