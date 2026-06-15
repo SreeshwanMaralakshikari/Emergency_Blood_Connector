@@ -1,5 +1,3 @@
-// src/pages/requester/RequesterDashboard.jsx
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
@@ -35,13 +33,19 @@ export default function RequesterDashboard() {
     const load = async () => {
       try {
         setLoading(true);
-        const [dashRes, reqRes] = await Promise.all([
+        const [dashRes, reqRes] = await Promise.allSettled([
           axiosInstance.get("/request-api/dashboard"),
           axiosInstance.get("/request-api/my-requests"),
         ]);
-        setDashboard(dashRes.data?.payload);
-        // Show only the 3 most recent on dashboard
-        setRequests((reqRes.data?.payload || []).slice(0, 3));
+        if (dashRes.status === "fulfilled") {
+          setDashboard(dashRes.value.data?.payload);
+        } else {
+          setError(dashRes.reason?.response?.data?.message || "Failed to load dashboard.");
+        }
+        if (reqRes.status === "fulfilled") {
+          //show only 3 most recent
+          setRequests((reqRes.value.data?.payload || []).slice(0, 3));
+        }
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load dashboard.");
       } finally {
@@ -63,8 +67,6 @@ export default function RequesterDashboard() {
   return (
     <div className={pageBackground}>
       <div className={pageWrapper}>
-
-        {/* ── Profile strip ─────────────────────── */}
         <div className="flex items-start justify-between gap-4 mb-10 flex-wrap">
           <div className="flex items-start gap-5">
             <div className={avatarLg}>{initials}</div>
@@ -79,8 +81,6 @@ export default function RequesterDashboard() {
             + New request
           </Link>
         </div>
-
-        {/* ── Stats strip ───────────────────────── */}
         <div className={`${dashStatsGrid} mb-10`}>
           <StatCard label="Total requests"     value={d.totalRequests}     accent />
           <StatCard label="Open"               value={d.openRequests} />
@@ -88,8 +88,6 @@ export default function RequesterDashboard() {
           <StatCard label="Units required"     value={d.totalUnitsRequired} />
           <StatCard label="Units fulfilled"    value={d.totalUnitsFulfilled} />
         </div>
-
-        {/* ── Fulfillment progress bar ──────────── */}
         {d.totalUnitsRequired > 0 && (
           <div className="bg-[#f4f4f4] rounded-xl p-5 mb-10">
             <div className="flex justify-between items-center mb-2">
@@ -112,8 +110,6 @@ export default function RequesterDashboard() {
             </div>
           </div>
         )}
-
-        {/* ── Recent requests ───────────────────── */}
         <div className={sectionHeader}>
           <h2 className={sectionTitle}>Recent requests</h2>
           <Link to="/requester/my-requests" className={secondaryBtn}>
@@ -137,8 +133,6 @@ export default function RequesterDashboard() {
         )}
 
         <div className={divider} />
-
-        {/* ── Quick actions ─────────────────────── */}
         <div className="flex gap-3 flex-wrap">
           <Link to="/requester/create"      className={primaryBtn}>Create new request</Link>
           <Link to="/requester/my-requests" className={secondaryBtn}>All my requests</Link>

@@ -1,5 +1,3 @@
-// src/utils/formatDate.js
-
 export const formatDate = (dateStr) => {
   if (!dateStr) return "Unknown";
   return new Date(dateStr).toLocaleDateString("en-IN", {

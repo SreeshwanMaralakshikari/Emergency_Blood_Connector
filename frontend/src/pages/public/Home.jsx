@@ -1,5 +1,3 @@
-// src/pages/public/Home.jsx
-
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
 import { selectIsAuth, selectRole } from "../../store/authSlice";
@@ -8,12 +6,17 @@ import {
   secondaryBtn,
   headingClass,
   bodyText,
-  mutedText,
-  divider,
   bloodGroupBadge,
 } from "../../styles/common";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+const STATS = [
+  { value: "36", label: "API endpoints" },
+  { value: "3", label: "Roles supported" },
+  { value: "6", label: "Donor levels" },
+  { value: "4", label: "Alert levels" },
+];
 
 const HOW_IT_WORKS = [
   {
@@ -48,8 +51,6 @@ export default function Home() {
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
-
-      {/* ── Hero ──────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16">
         <div className="max-w-2xl">
           <span className="inline-block text-[#c0152a] text-xs font-bold uppercase tracking-widest mb-4">
@@ -73,8 +74,16 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── How it works ──────────────────────────────── */}
+      <section className="border-y border-[#e4e4e4] bg-white">
+        <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6">
+          {STATS.map((s) => (
+            <div key={s.label} className="flex flex-col gap-0.5">
+              <span className="text-3xl font-bold text-[#c0152a] tracking-tight">{s.value}</span>
+              <span className="text-xs font-semibold text-[#9e9e9e] uppercase tracking-widest">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
       <section className="max-w-5xl mx-auto px-6 py-16">
         <h2 className={`${headingClass} mb-10`}>How it works</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -89,8 +98,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* ── Alert levels ──────────────────────────────── */}
       <section className="bg-white border-y border-[#e4e4e4]">
         <div className="max-w-5xl mx-auto px-6 py-14">
           <h2 className={`${headingClass} mb-2`}>Alert levels</h2>
@@ -99,10 +106,10 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { level: "GREEN",  points: 2,  desc: "Routine — can wait a few days" },
+              { level: "GREEN",  points: 1,   desc: "Routine — can wait a few days" },
               { level: "YELLOW", points: 5,  desc: "Moderate — needed within 24–48 hrs" },
-              { level: "RED",    points: 10, desc: "Critical — needed within hours" },
-              { level: "BLACK",  points: 25, desc: "Catastrophic — immediate" },
+              { level: "RED",    points: 25,  desc: "Critical — needed within hours" },
+              { level: "BLACK",  points: 100, desc: "Catastrophic — immediate" },
             ].map((a) => (
               <div key={a.level} className="bg-[#f4f4f4] rounded-xl p-5 flex flex-col gap-2">
                 <span className={`self-start text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${
@@ -120,8 +127,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── Blood groups ──────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 py-14">
         <h2 className={`${headingClass} mb-2`}>All blood groups supported</h2>
         <p className={`${bodyText} mb-7`}>Requests and donor profiles cover all 8 ABO/Rh blood groups.</p>
@@ -133,8 +138,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* ── CTA bottom ────────────────────────────────── */}
       {!isAuth && (
         <section className="border-t border-[#e4e4e4] bg-[#f4f4f4]">
           <div className="max-w-5xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">

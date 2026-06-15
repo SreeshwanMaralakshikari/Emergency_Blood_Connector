@@ -1,5 +1,3 @@
-// src/pages/requester/MyRequests.jsx
-
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import axiosInstance from "../../api/axiosInstance";
@@ -7,8 +5,8 @@ import RequestCard from "../../components/RequestCard";
 import {
   pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
   loadingClass, errorClass, emptyStateClass,
-  requestGrid, sectionHeader, sectionTitle,
-  primaryBtn, selectClass,
+  requestGrid,
+  primaryBtn,
 } from "../../styles/common";
 
 const STATUS_FILTERS = ["ALL", "OPEN", "FULFILLED", "CLOSED", "EXPIRED", "DELETED"];
@@ -35,7 +33,7 @@ export default function MyRequests() {
 
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
-  // Client-side status filter
+  //client-side status filter
   useEffect(() => {
     setFiltered(
       status === "ALL"
@@ -44,7 +42,7 @@ export default function MyRequests() {
     );
   }, [requests, status]);
 
-  // Count by status for the tab badges
+  //count by status for tab badges
   const countBy = (s) => requests.filter((r) => r.status === s).length;
 
   return (

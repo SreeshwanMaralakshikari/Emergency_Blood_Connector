@@ -1,24 +1,22 @@
-// src/pages/donor/Achievements.jsx
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import axiosInstance from "../../api/axiosInstance";
 import {
   pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
-  loadingClass, errorClass, emptyStateClass, divider,
+  loadingClass, errorClass, divider,
   statsGrid, statCard, statValue, statLabel,
   getLevelClass, pointsPill,
   progressTrack, progressFill, progressFillSuccess,
 } from "../../styles/common";
 
-// Level thresholds — match backend logic
+//level thresholds — match backend calculateLevel.js
 const LEVELS = [
-  { name: "Iron",     minPoints: 0   },
-  { name: "Bronze",   minPoints: 10  },
-  { name: "Silver",   minPoints: 30  },
-  { name: "Gold",     minPoints: 75  },
-  { name: "Platinum", minPoints: 150 },
-  { name: "Diamond",  minPoints: 300 },
+  { name: "Iron",     minPoints: 0    },
+  { name: "Bronze",   minPoints: 11   },
+  { name: "Silver",   minPoints: 26   },
+  { name: "Gold",     minPoints: 51   },
+  { name: "Platinum", minPoints: 101  },
+  { name: "Diamond",  minPoints: 1000 },
 ];
 
 function getLevelProgress(totalPoints) {
@@ -33,7 +31,7 @@ function getLevelProgress(totalPoints) {
   return { current, next, pct, ptsToNext: next.minPoints - totalPoints };
 }
 
-// Milestone thresholds
+//milestone thresholds
 const MILESTONES = [
   { label: "First Donation",   donationsNeeded: 1,   pointsNeeded: null },
   { label: "Five Donations",   donationsNeeded: 5,   pointsNeeded: null },
@@ -120,7 +118,6 @@ export default function Achievements() {
 
         {!loading && !error && (
           <>
-            {/* ── Stats ──────────────────────────── */}
             <div className={`${statsGrid} mb-10`}>
               <div className={statCard}>
                 <p className={statValue}>{donationsCount}</p>
@@ -139,8 +136,6 @@ export default function Achievements() {
                 <p className={statLabel}>Donor level</p>
               </div>
             </div>
-
-            {/* ── Level progress ─────────────────── */}
             <div className="bg-[#f4f4f4] rounded-xl p-6 mb-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -183,8 +178,6 @@ export default function Achievements() {
                 </p>
               )}
             </div>
-
-            {/* ── Milestones ─────────────────────── */}
             <h2 className="text-base font-bold text-[#1a1a1a] mb-4 tracking-tight">
               Milestones
             </h2>

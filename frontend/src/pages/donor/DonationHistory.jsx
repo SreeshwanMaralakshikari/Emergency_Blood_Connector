@@ -1,10 +1,8 @@
-// src/pages/donor/DonationHistory.jsx
-
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import {
   pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
-  loadingClass, errorClass, emptyStateClass, divider,
+  loadingClass, errorClass, emptyStateClass,
   requestNumberClass, getAlertClass, pointsPill,
 } from "../../styles/common";
 import { formatDate } from "../../utils/formatDate";
@@ -58,7 +56,7 @@ export default function DonationHistory() {
     load();
   }, []);
 
-  // Totals
+  //totals
   const totalPoints = donations.reduce((s, d) => s + (d.pointsAwarded || 0), 0);
   const totalUnits  = donations.reduce((s, d) => s + (d.unitsDonated  || 0), 0);
 

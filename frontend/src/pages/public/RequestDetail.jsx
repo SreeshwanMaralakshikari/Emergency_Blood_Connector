@@ -1,62 +1,37 @@
-// src/pages/public/RequestDetail.jsx
-// Shows full details of a blood request.
-// DONOR   → can Accept (if OPEN) or Complete (if already accepted)
-// REQUESTER (owner) → can Edit, Close, Delete
-// ADMIN   → can Force Close
-// Public  → read-only view
+//shows full details of a blood request
+//DONOR   → can Accept (if OPEN) or Complete (if already accepted)
+//REQUESTER (owner) → can Edit, Close, Delete
+//ADMIN   → can Force Close
+//Public  → read-only view
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import axiosInstance from "../../api/axiosInstance";
+import { selectUser, selectRole, selectIsAuth } from "../../store/authSlice";
 import {
-  selectUser,
-  selectRole,
-  selectIsAuth,
-} from "../../store/authSlice";
-import {
-  pageBackground,
-  requestPageWrapper,
-  requestMainTitle,
-  requestMetaRow,
-  requestInfoRow,
-  requestFooter,
-  requestActions,
-  detailGrid,
-  detailLabel,
-  detailValue,
-  progressTrack,
-  progressFill,
-  progressFillSuccess,
-  requestNumberClass,
-  bloodGroupBadge,
-  getStatusClass,
-  getAlertClass,
-  acceptBtn,
-  completeBtn,
-  editBtn,
-  closeBtn,
-  deleteBtn,
-  forceCloseBtn,
-  errorClass,
-  loadingClass,
-  mutedText,
-  divider,
-  bodyText,
+  pageBackground, requestPageWrapper, requestMainTitle,
+  requestMetaRow, requestFooter, requestActions,
+  detailGrid, detailLabel, detailValue,
+  progressTrack, progressFill, progressFillSuccess,
+  requestNumberClass, bloodGroupBadge,
+  getStatusClass, getAlertClass,
+  acceptBtn, completeBtn, editBtn, closeBtn, deleteBtn, forceCloseBtn,
+  errorClass, loadingClass, mutedText, divider,
 } from "../../styles/common";
 import { formatDate, formatDateTime, timeAgo } from "../../utils/formatDate";
 
 export default function RequestDetail() {
-  const { requestNumber }         = useParams();
-  const navigate                  = useNavigate();
-  const user                      = useSelector(selectUser);
-  const role                      = useSelector(selectRole);
-  const isAuth                    = useSelector(selectIsAuth);
+  const { requestNumber }               = useParams();
+  const navigate                        = useNavigate();
+  const user                            = useSelector(selectUser);
+  const role                            = useSelector(selectRole);
+  const isAuth                          = useSelector(selectIsAuth);
 
-  const [request, setRequest]     = useState(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState("");
+  const [request, setRequest]           = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState("");
   const [actionLoading, setActionLoading] = useState("");
 
   const fetchRequest = useCallback(async () => {
@@ -80,25 +55,20 @@ export default function RequestDetail() {
   if (error)   return <div className={pageBackground}><div className={`${errorClass} max-w-xl mx-auto mt-20`}>{error}</div></div>;
   if (!request) return null;
 
-  const req        = request;
-  const fulfilled  = req.unitsFulfilled ?? 0;
-  const required   = req.unitsRequired  ?? 1;
-  const pct        = Math.min(100, Math.round((fulfilled / required) * 100));
-  const isDone     = fulfilled >= required;
+  const req       = request;
+  const fulfilled = req.unitsFulfilled ?? 0;
+  const required  = req.unitsRequired  ?? 1;
+  const pct       = Math.min(100, Math.round((fulfilled / required) * 100));
+  const isDone    = fulfilled >= required;
 
-  // Determine donor's relationship to this request
-  const userId           = user?.id || user?._id;
-  const hasAccepted      = req.acceptedDonors?.some(
-    (d) => String(d.donorId || d) === String(userId)
-  );
-  const hasCompleted     = req.completedDonors?.some(
-    (d) => String(d.donorId || d) === String(userId)
-  );
-  const isOwner          = String(req.requestCreatedBy?._id || req.requestCreatedBy) === String(userId);
-  const isOpen           = req.status === "OPEN";
+  //determine donor's relationship to this request
+  const userId       = user?.id || user?._id;
+  const hasAccepted  = req.acceptedDonors?.some((d) => String(d.donorId || d) === String(userId));
+  const hasCompleted = req.completedDonors?.some((d) => String(d.donorId || d) === String(userId));
+  const isOwner      = String(req.requestCreatedBy?._id || req.requestCreatedBy) === String(userId);
+  const isOpen       = req.status === "OPEN";
 
-  // ── Action handlers ─────────────────────────────────
-
+  //action handlers
   const handleAccept = async () => {
     try {
       setActionLoading("accept");
@@ -181,7 +151,7 @@ export default function RequestDetail() {
           ← Back to requests
         </button>
 
-        {/* ── Header ─────────────────────────────── */}
+        {/* Header */}
         <div className="mb-6 flex flex-col gap-3">
           {/* Badges row */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -200,7 +170,7 @@ export default function RequestDetail() {
           <span className={requestNumberClass}>{req.requestNumber}</span>
         </div>
 
-        {/* ── Meta row ───────────────────────────── */}
+        {/* Meta row */}
         <div className={requestMetaRow}>
           <div className="flex items-center gap-6 flex-wrap text-sm text-[#6b6b6b]">
             <span>📍 {req.hospitalName}, {req.state}</span>
@@ -211,7 +181,7 @@ export default function RequestDetail() {
           </div>
         </div>
 
-        {/* ── Units progress ──────────────────────── */}
+        {/* Units progress */}
         <div className="mt-7 mb-6 bg-[#f4f4f4] rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -240,7 +210,7 @@ export default function RequestDetail() {
           </p>
         </div>
 
-        {/* ── Action buttons ──────────────────────── */}
+        {/* Action buttons */}
         {isAuth && (
           <div className={requestActions}>
 
@@ -274,8 +244,8 @@ export default function RequestDetail() {
               </span>
             )}
 
-            {/* REQUESTER / ADMIN (owner) actions */}
-            {(isOwner || role === "ADMIN") && isOpen && (
+            {/* REQUESTER / owner actions */}
+            {isOwner && isOpen && (
               <>
                 <button
                   onClick={() => navigate(`/requester/edit/${req.requestNumber}`)}
@@ -301,15 +271,31 @@ export default function RequestDetail() {
               </>
             )}
 
-            {/* ADMIN-only force close */}
+            {/* ADMIN actions — edit/close/delete for any request, force-close for non-owned */}
             {role === "ADMIN" && !isOwner && isOpen && (
-              <button
-                onClick={handleForceClose}
-                disabled={!!actionLoading}
-                className={`${forceCloseBtn} ${actionLoading ? "opacity-60 cursor-not-allowed" : ""}`}
-              >
-                {busy("forceClose") ? "Closing…" : "Force close (Admin)"}
-              </button>
+              <>
+                <button
+                  onClick={() => navigate(`/requester/edit/${req.requestNumber}`)}
+                  disabled={!!actionLoading}
+                  className={editBtn}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleForceClose}
+                  disabled={!!actionLoading}
+                  className={`${forceCloseBtn} ${actionLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {busy("forceClose") ? "Closing…" : "Force close"}
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={!!actionLoading}
+                  className={`${deleteBtn} ${actionLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {busy("delete") ? "Deleting…" : "Delete"}
+                </button>
+              </>
             )}
 
           </div>
@@ -324,9 +310,9 @@ export default function RequestDetail() {
           </div>
         )}
 
-        {/* ── Detail info grid ────────────────────── */}
         <div className={divider} />
 
+        {/* Details grid */}
         <h2 className="text-base font-bold text-[#1a1a1a] mb-4 tracking-tight">Request details</h2>
 
         <div className={detailGrid}>
@@ -380,7 +366,7 @@ export default function RequestDetail() {
           </div>
         </div>
 
-        {/* ── Footer ─────────────────────────────── */}
+        {/* Footer */}
         <div className={requestFooter}>
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span>Posted {formatDateTime(req.createdAt)}</span>

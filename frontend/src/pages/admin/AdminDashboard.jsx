@@ -1,11 +1,9 @@
-// src/pages/admin/AdminDashboard.jsx
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import axiosInstance from "../../api/axiosInstance";
 import {
   pageBackground, pageWrapper, pageTitleClass, bodyText,
-  mutedText, sectionHeader, sectionTitle, divider,
+  sectionTitle, divider,
   loadingClass, errorClass,
   dashStatsGrid, dashStatCard, dashStatCardAccent,
   dashStatValue, dashStatValueAccent, dashStatLabel,
@@ -58,8 +56,6 @@ export default function AdminDashboard() {
             Live platform overview across all users, requests, and donations.
           </p>
         </div>
-
-        {/* ── Users ──────────────────────────────── */}
         <h2 className={`${sectionTitle} mb-4`}>Users</h2>
         <div className={`${dashStatsGrid} mb-10`}>
           <Stat label="Total users"       value={d.totalUsers}      accent />
@@ -68,8 +64,6 @@ export default function AdminDashboard() {
           <Stat label="Available donors"  value={d.availableDonors} />
           <Stat label="Unavailable"       value={d.unavailableDonors} />
         </div>
-
-        {/* ── Requests ───────────────────────────── */}
         <h2 className={`${sectionTitle} mb-4`}>Requests</h2>
         <div className={`${dashStatsGrid} mb-10`}>
           <Stat label="Total requests"    value={d.totalRequests}     accent />
@@ -78,17 +72,12 @@ export default function AdminDashboard() {
           <Stat label="Closed"            value={d.closedRequests} />
           <Stat label="Deleted"           value={d.deletedRequests} />
         </div>
-
-        {/* ── Donations ──────────────────────────── */}
         <h2 className={`${sectionTitle} mb-4`}>Donations</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-          <Stat label="Total donations"   value={d.totalDonations} accent />
-          <Stat label="Expired requests"  value={d.expiredRequests} />
+          <Stat label="Total donations" value={d.totalDonations} accent />
         </div>
 
         <div className={divider} />
-
-        {/* ── Quick nav ───────────────────────────── */}
         <h2 className={`${sectionTitle} mb-5`}>Manage</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[

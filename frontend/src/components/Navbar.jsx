@@ -1,5 +1,3 @@
-// src/components/Navbar.jsx
-
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";

@@ -6,32 +6,45 @@ import {verifyToken} from '../middlewares/verifyToken.js'
 
 export const commonApp=exp.Router();
 
-// Register — POST /auth/register
+
+// REGISTER
 commonApp.post("/register",async(req,res,next)=>{
     try
     {
+        //destructure only known fields to avoid strict:throw errors
         const {firstName,lastName,email,password,phoneNumber,bloodGroup,state,role,profileImageUrl}=req.body;
+
+        //only DONOR and REQUESTER can self-register
         const allowedRoles=["DONOR","REQUESTER"];
         if(!allowedRoles.includes(role))
         {
             return res.status(400).json({message:"Invalid Role"});
         }
+
+        //validate password
         if(!password || password.trim().length===0)
         {
             return res.status(400).json({message:"Password cannot be empty"});
         }
+
+        //check for existing user
         const existingUser=await UserModel.findOne({email});
         if(existingUser)
         {
             return res.status(409).json({message:"User already exists"});
         }
+
+        //hash password and create user
         const hashedPassword=await bcryptjs.hash(password,10);
         const createdUser=await UserModel.create({
             firstName,lastName,email,password:hashedPassword,
             phoneNumber,bloodGroup,state,role,profileImageUrl
         });
+
         const userObj=createdUser.toObject();
         delete userObj.password;
+
+        //send res
         res.status(201).json({message:"User created successfully",payload:userObj});
     }
     catch(err)
@@ -40,25 +53,34 @@ commonApp.post("/register",async(req,res,next)=>{
     }
 });
 
-// Login — POST /auth/login
+
+// LOGIN
 commonApp.post("/login",async(req,res,next)=>{
     try
     {
         const userCred=req.body;
+
+        //find user by email
         const dbUser=await UserModel.findOne({email:userCred.email});
         if(!dbUser)
         {
             return res.status(401).json({message:"Invalid Email"});
         }
+
+        //check password
         const passwordMatched=await bcryptjs.compare(userCred.password,dbUser.password);
         if(!passwordMatched)
         {
             return res.status(401).json({message:"Invalid Password"});
         }
+
+        //check if user is active
         if(!dbUser.isUserActive)
         {
             return res.status(400).json({message:"User has been deactivated"});
         }
+
+        //update login history (keep last 50 entries)
         dbUser.lastLogin=new Date();
         dbUser.loginHistory.push(new Date());
         if(dbUser.loginHistory.length>50)
@@ -66,14 +88,19 @@ commonApp.post("/login",async(req,res,next)=>{
             dbUser.loginHistory.shift();
         }
         await dbUser.save();
+
+        //sign JWT token
         const signedToken=jwt.sign(
             {userId:dbUser._id,email:dbUser.email,role:dbUser.role},
             process.env.SECRET_KEY,
             {expiresIn:"7d"}
         );
-        // no cookie — token sent in response body, stored in localStorage by frontend
+
+        //token sent in response body, stored in localStorage by frontend
         const userObj=dbUser.toObject();
         delete userObj.password;
+
+        //send res
         res.status(200).json({message:"Login Successful",token:signedToken,payload:userObj});
     }
     catch(err)
@@ -82,7 +109,8 @@ commonApp.post("/login",async(req,res,next)=>{
     }
 });
 
-// Check Auth — GET /auth/check-auth
+
+// CHECK AUTH
 commonApp.get("/check-auth",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
     try
     {
@@ -91,6 +119,8 @@ commonApp.get("/check-auth",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,r
         {
             return res.status(404).json({message:"User Not Found"});
         }
+
+        //send res
         res.status(200).json({message:"Authenticated",payload:dbUser});
     }
     catch(err)
@@ -99,13 +129,15 @@ commonApp.get("/check-auth",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,r
     }
 });
 
-// Logout — GET /auth/logout
-// token is removed from localStorage by frontend — nothing to do on backend
+
+// LOGOUT
 commonApp.get("/logout",(req,res)=>{
+    //token is removed from localStorage by frontend
     res.status(200).json({message:"Logout Successful"});
 });
 
-// Health Check — GET /auth/
+
+// HEALTH CHECK
 commonApp.get("/",(req,res)=>{
     res.json({message:"Common API Working"});
 });

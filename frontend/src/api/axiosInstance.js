@@ -1,5 +1,3 @@
-// src/api/axiosInstance.js
-// Attaches JWT token from localStorage on every request via interceptor
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -7,7 +5,7 @@ const axiosInstance = axios.create({
   withCredentials: false,
 });
 
-// Attach token from localStorage to every request
+//automatically attach token to every request
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {

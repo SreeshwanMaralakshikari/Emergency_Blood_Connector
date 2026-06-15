@@ -1,7 +1,4 @@
-// src/store/notifSlice.js
-// Stores the unread notification count globally so the Navbar
-// bell badge stays in sync without re-fetching on every render.
-
+//stores unread notification count globally so the navbar bell badge stays in sync
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../api/axiosInstance";
 

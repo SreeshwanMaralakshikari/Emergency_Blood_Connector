@@ -1,5 +1,3 @@
-// src/App.jsx
-
 import { useEffect } from "react";
 import { Routes, Route } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
@@ -45,12 +43,12 @@ export default function App() {
   const dispatch = useDispatch();
   const isAuth   = useSelector(selectIsAuth);
 
-  // Restore session on page load
+  //restore session on page load
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  // Fetch unread count whenever auth state resolves to true
+  //fetch unread count when logged in
   useEffect(() => {
     if (isAuth) dispatch(fetchUnreadCount());
   }, [isAuth, dispatch]);
@@ -74,24 +72,16 @@ export default function App() {
       <Navbar />
 
       <Routes>
-
-        {/* ── Public ─────────────────────────────── */}
         <Route path="/"                        element={<Home />} />
         <Route path="/requests"                element={<OpenRequests />} />
         <Route path="/requests/:requestNumber" element={<RequestDetail />} />
         <Route path="/donor/leaderboard"       element={<Leaderboard />} />
         <Route path="/unauthorized"            element={<Unauthorized />} />
-
-        {/* ── Auth ───────────────────────────────── */}
         <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        {/* ── Notifications (any logged-in role) ─── */}
         <Route path="/notifications" element={
           <ProtectedRoute><Notifications /></ProtectedRoute>
         } />
-
-        {/* ── Donor ──────────────────────────────── */}
         <Route path="/donor/dashboard" element={
           <ProtectedRoute allowedRoles={["DONOR", "ADMIN"]}>
             <DonorDashboard />
@@ -112,8 +102,6 @@ export default function App() {
             <Achievements />
           </ProtectedRoute>
         } />
-
-        {/* ── Requester ──────────────────────────── */}
         <Route path="/requester/dashboard" element={
           <ProtectedRoute allowedRoles={["REQUESTER", "ADMIN"]}>
             <RequesterDashboard />
@@ -134,8 +122,6 @@ export default function App() {
             <EditRequest />
           </ProtectedRoute>
         } />
-
-        {/* ── Admin ──────────────────────────────── */}
         <Route path="/admin/dashboard" element={
           <ProtectedRoute allowedRoles={["ADMIN"]}>
             <AdminDashboard />
@@ -156,8 +142,6 @@ export default function App() {
             <AdminStatistics />
           </ProtectedRoute>
         } />
-
-        {/* ── 404 ────────────────────────────────── */}
         <Route path="*" element={
           <div className="min-h-screen flex flex-col items-center justify-center gap-3">
             <p className="text-2xl font-bold text-[#1a1a1a]">404</p>

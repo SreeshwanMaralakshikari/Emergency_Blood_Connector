@@ -1,5 +1,4 @@
-// src/pages/admin/AdminRequests.jsx
-// Browse all requests by status. View details. Force close any OPEN request.
+//shows all blood requests across status tabs — admin can force close any OPEN request
 
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
@@ -127,7 +126,7 @@ export default function AdminRequests() {
     if (t) fetchRequests(t.endpoint);
   }, [tab, fetchRequests]);
 
-  // Client-side search
+  //client-side search
   useEffect(() => {
     if (!search.trim()) { setFiltered(requests); return; }
     const q = search.toLowerCase();
@@ -146,10 +145,11 @@ export default function AdminRequests() {
       setForcing(requestNumber);
       await axiosInstance.patch("/admin-api/force-close-request", { requestNumber });
       toast.success("Request force closed.");
+      //if on the open tab, remove it from the list; otherwise update status
       setRequests((prev) =>
-        prev.map((r) =>
-          r.requestNumber === requestNumber ? { ...r, status: "CLOSED" } : r
-        )
+        tab === "open"
+          ? prev.filter((r) => r.requestNumber !== requestNumber)
+          : prev.map((r) => r.requestNumber === requestNumber ? { ...r, status: "CLOSED" } : r)
       );
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to force close request.");

@@ -67,10 +67,6 @@ const userSchema=new Schema({
         type:[String],
         default:[]
     },
-    notifications:{
-        type:[String],
-        default:[]
-    },
     lastDonationDate:{
         type:Date,
         default:null

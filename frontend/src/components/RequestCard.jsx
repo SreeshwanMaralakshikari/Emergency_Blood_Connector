@@ -1,6 +1,5 @@
-// src/components/RequestCard.jsx
-// Reusable card shown on the Open Requests listing page.
-// Clicking navigates to the full detail page.
+//reusable card used on open requests page, dashboards, and my-requests
+//clicking navigates to the full request detail page
 
 import { useNavigate } from "react-router";
 import {

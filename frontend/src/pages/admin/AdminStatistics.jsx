@@ -1,6 +1,4 @@
-// src/pages/admin/AdminStatistics.jsx
-// Visual distribution breakdowns — blood groups, alert levels,
-// request statuses, and state-wise users. Pure CSS bars, no chart library.
+//pure CSS bar chart distributions — blood groups, alert levels, statuses, states
 
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
@@ -10,7 +8,6 @@ import {
   getAlertClass, getStatusClass,
 } from "../../styles/common";
 
-// ── Simple horizontal bar chart ───────────────────────────────
 function BarChart({ rows, colorClass, total }) {
   if (!rows || rows.length === 0) return <p className="text-sm text-[#9e9e9e]">No data.</p>;
   const max = Math.max(...rows.map((r) => r.count), 1);
@@ -41,7 +38,6 @@ function BarChart({ rows, colorClass, total }) {
   );
 }
 
-// ── Badge-style distribution (for alert levels / statuses) ────
 function BadgeDistribution({ rows, getBadgeClass }) {
   if (!rows || rows.length === 0) return <p className="text-sm text-[#9e9e9e]">No data.</p>;
   const total = rows.reduce((s, r) => s + r.count, 0);
@@ -69,8 +65,7 @@ function BadgeDistribution({ rows, getBadgeClass }) {
   );
 }
 
-// Normalise API response — backend returns array of {_id, count}
-// Convert to {label, count} for consistent rendering
+//convert backend array of {_id, count} to {label, count} for rendering
 function toRows(data) {
   if (!data) return [];
   if (Array.isArray(data)) {
@@ -106,7 +101,7 @@ export default function AdminStatistics() {
   if (loading) return <div className={pageBackground}><p className={`${loadingClass} pt-32`}>Loading statistics…</p></div>;
   if (error)   return <div className={pageBackground}><div className={`${errorClass} max-w-xl mx-auto mt-20`}>{error}</div></div>;
 
-  // Backend sends: bloodGroupStats, stateStats, alertLevelStats, requestStatusStats
+  //read stats from payload
   const bloodGroupRows = toRows(stats?.bloodGroupStats);
   const alertRows      = toRows(stats?.alertLevelStats);
   const statusRows     = toRows(stats?.requestStatusStats);
@@ -129,8 +124,6 @@ export default function AdminStatistics() {
             Platform-wide distributions across blood groups, urgency levels, request statuses, and geography.
           </p>
         </div>
-
-        {/* ── Blood group distribution ──────────── */}
         <section className="mb-10">
           <h2 className={`${sectionTitle} mb-6`}>Blood group distribution</h2>
           <div className="bg-[#f4f4f4] rounded-xl p-6">
@@ -150,8 +143,6 @@ export default function AdminStatistics() {
         </section>
 
         <div className={divider} />
-
-        {/* ── Alert level distribution ──────────── */}
         <section className="mb-10">
           <h2 className={`${sectionTitle} mb-6`}>Alert level distribution</h2>
           <div className="bg-[#f4f4f4] rounded-xl p-6">
@@ -168,8 +159,6 @@ export default function AdminStatistics() {
         </section>
 
         <div className={divider} />
-
-        {/* ── Request status distribution ───────── */}
         <section className="mb-10">
           <h2 className={`${sectionTitle} mb-6`}>Request status distribution</h2>
           <div className="bg-[#f4f4f4] rounded-xl p-6">
@@ -186,8 +175,6 @@ export default function AdminStatistics() {
         </section>
 
         <div className={divider} />
-
-        {/* ── State-wise user distribution ─────── */}
         <section className="mb-10">
           <h2 className={`${sectionTitle} mb-2`}>State-wise user distribution</h2>
           <p className={`${bodyText} mb-6`}>Top states by number of registered users.</p>

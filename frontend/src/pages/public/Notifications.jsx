@@ -1,7 +1,5 @@
-// src/pages/public/Notifications.jsx
-// Shows all notifications for the logged-in user.
-// Unread ones are highlighted. Clicking "Mark as read" updates the badge
-// in the Navbar via the Redux notifSlice.
+//shows all notifications for the logged-in user
+//unread ones are highlighted; marking as read updates the navbar badge via Redux
 
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
@@ -10,13 +8,12 @@ import { fetchUnreadCount, decrementUnread } from "../../store/notifSlice";
 import {
   pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
   loadingClass, errorClass, emptyStateClass,
-  notifCard, notifCardUnread,
-  notifTitle, notifMessage, notifTime,
+  notifCard, notifCardUnread, notifTitle, notifMessage, notifTime,
   getNotifDotClass,
 } from "../../styles/common";
 import { timeAgo, formatDateTime } from "../../utils/formatDate";
 
-// Human-readable labels for notification types
+//human-readable labels for notification types
 const TYPE_LABELS = {
   REQUEST_CREATED:    "Request created",
   REQUEST_ACCEPTED:   "Request accepted",
@@ -32,6 +29,7 @@ function NotifCard({ notif, onMarkRead }) {
   return (
     <div className={isUnread ? notifCardUnread : notifCard}>
       <div className="flex items-start gap-3">
+
         {/* Type dot */}
         <span className={`${dotClass} mt-1`} />
 
@@ -65,17 +63,18 @@ function NotifCard({ notif, onMarkRead }) {
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
 }
 
 export default function Notifications() {
-  const dispatch                      = useDispatch();
+  const dispatch                          = useDispatch();
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState("");
-  const [filter, setFilter]           = useState("ALL"); // ALL | UNREAD | READ
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState("");
+  const [filter, setFilter]               = useState("ALL"); // ALL | UNREAD | READ
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -97,30 +96,30 @@ export default function Notifications() {
   const handleMarkRead = async (id) => {
     try {
       await axiosInstance.put(`/notification-api/mark-read/${id}`);
-      // Update local state immediately — no full refetch needed
+      //update local state immediately
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
       );
-      // Decrement the navbar badge
+      //decrement the navbar badge
       dispatch(decrementUnread());
     } catch (err) {
-      // Silent fail — notification stays unread, user can retry
+      //silent fail — notification stays unread, user can retry
       console.error("Mark read failed:", err.message);
     }
   };
 
   const handleMarkAllRead = async () => {
     const unread = notifications.filter((n) => !n.isRead);
-    // Fire all in parallel
+    //fire all in parallel
     await Promise.allSettled(
       unread.map((n) => axiosInstance.put(`/notification-api/mark-read/${n._id}`))
     );
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    // Re-sync the badge from the server
+    //re-sync the badge from server
     dispatch(fetchUnreadCount());
   };
 
-  // Filtered list
+  //filtered list
   const displayed =
     filter === "UNREAD" ? notifications.filter((n) => !n.isRead)
     : filter === "READ"  ? notifications.filter((n) =>  n.isRead)
@@ -132,7 +131,7 @@ export default function Notifications() {
     <div className={pageBackground}>
       <div className={pageWrapper}>
 
-        {/* ── Header ──────────────────────────── */}
+        {/* Header */}
         <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
           <div>
             <p className="text-[#c0152a] text-xs font-bold uppercase tracking-widest mb-2">
@@ -146,7 +145,7 @@ export default function Notifications() {
             </p>
           </div>
 
-          {/* Mark all read button */}
+          {/* Mark all read */}
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
@@ -158,7 +157,7 @@ export default function Notifications() {
           )}
         </div>
 
-        {/* ── Filter tabs ──────────────────────── */}
+        {/* Filter tabs */}
         <div className="flex gap-1 border-b border-[#e4e4e4] mb-8">
           {[
             { key: "ALL",    label: "All",    count: notifications.length },
@@ -189,15 +188,12 @@ export default function Notifications() {
           ))}
         </div>
 
-        {/* ── States ───────────────────────────── */}
+        {/* States */}
         {loading && <p className={loadingClass}>Loading notifications…</p>}
         {error   && (
           <div className={`${errorClass} mb-6`}>
             {error}{" "}
-            <button
-              onClick={fetchNotifications}
-              className="underline font-semibold ml-1 cursor-pointer"
-            >
+            <button onClick={fetchNotifications} className="underline font-semibold ml-1 cursor-pointer">
               Retry
             </button>
           </div>
@@ -211,7 +207,7 @@ export default function Notifications() {
           </p>
         )}
 
-        {/* ── Notification list ─────────────────── */}
+        {/* Notification list */}
         {!loading && displayed.length > 0 && (
           <div className="flex flex-col gap-3">
             {displayed.map((n) => (

@@ -1,4 +1,3 @@
-// src/pages/public/Unauthorized.jsx
 import { Link } from "react-router";
 import { primaryBtn } from "../../styles/common";
 

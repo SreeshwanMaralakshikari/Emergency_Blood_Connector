@@ -1,10 +1,9 @@
-// src/pages/donor/Leaderboard.jsx
-// Public page — shows top donors + current donor's personal rank
+//public page — shows all donors ranked by points + logged-in donor's rank
 
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useSelector } from "react-redux";
-import { selectUser, selectIsAuth } from "../../store/authSlice";
+import { selectUser, selectIsAuth, selectRole } from "../../store/authSlice";
 import {
   pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
   loadingClass, errorClass, emptyStateClass,
@@ -28,7 +27,6 @@ function LeaderRow({ entry, isMe, position }) {
       {/* Name + meta */}
       <div className="flex flex-col gap-0.5 flex-1 px-3">
         <span className={leaderboardName}>
-          {/* Backend sends donorName as combined string */}
           {entry.donorName}
           {isMe && (
             <span className="ml-2 text-[10px] font-bold text-[#c0152a] bg-[#c0152a]/10
@@ -58,6 +56,7 @@ function LeaderRow({ entry, isMe, position }) {
 export default function Leaderboard() {
   const user                  = useSelector(selectUser);
   const isAuth                = useSelector(selectIsAuth);
+  const role                  = useSelector(selectRole);
   const [leaders, setLeaders] = useState([]);
   const [myRank, setMyRank]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -68,10 +67,18 @@ export default function Leaderboard() {
       try {
         setLoading(true);
         const promises = [axiosInstance.get("/donor-api/leaderboard")];
-        if (isAuth) promises.push(axiosInstance.get("/donor-api/my-rank"));
-        const [lbRes, rankRes] = await Promise.all(promises);
-        setLeaders(lbRes.data?.payload || []);
-        if (rankRes) setMyRank(rankRes.data?.payload);
+        //only fetch rank for donors — other roles get 403 from backend
+        if (isAuth && role === "DONOR") promises.push(axiosInstance.get("/donor-api/my-rank"));
+        const [lbRes, rankRes] = await Promise.allSettled(promises);
+        if (lbRes.status === "fulfilled") {
+          setLeaders(lbRes.value.data?.payload || []);
+        } else {
+          setError(lbRes.reason?.response?.data?.message || "Failed to load leaderboard.");
+        }
+        if (rankRes?.status === "fulfilled") {
+          setMyRank(rankRes.value.data?.payload);
+        }
+        //rank failure is silent — leaderboard still loads
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load leaderboard.");
       } finally {
@@ -79,9 +86,9 @@ export default function Leaderboard() {
       }
     };
     load();
-  }, [isAuth]);
+  }, [isAuth, role]);
 
-  // Backend sends donorId (not _id) so use that for the isMe check
+  //backend uses donorId (not _id) for the leaderboard entries
   const userId = user?.id || user?._id;
 
   return (
@@ -100,7 +107,7 @@ export default function Leaderboard() {
         </div>
 
         {/* My rank card */}
-        {isAuth && myRank && (
+        {isAuth && role === "DONOR" && myRank && (
           <div className="bg-[#c0152a]/[0.04] border border-[#c0152a]/[0.14]
                           rounded-xl p-5 mb-8 flex items-center justify-between flex-wrap gap-4">
             <div>

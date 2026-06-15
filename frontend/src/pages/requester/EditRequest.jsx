@@ -1,5 +1,4 @@
-// src/pages/requester/EditRequest.jsx
-// Pre-fills with current request data. Only OPEN requests can be edited.
+//pre-fills with current request data — only OPEN requests can be edited
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
@@ -43,7 +42,7 @@ export default function EditRequest() {
     formState: { errors },
   } = useForm();
 
-  // Load existing request and pre-fill form
+  //load existing request and pre-fill form
   useEffect(() => {
     if (!requestNumber) return;
     const load = async () => {
@@ -56,7 +55,7 @@ export default function EditRequest() {
           return;
         }
         setRequest(req);
-        // Pre-fill form with existing values
+        //pre-fill form with existing values
         reset({
           patientName:     req.patientName     || "",
           patientAge:      req.patientAge      || "",
@@ -147,8 +146,6 @@ export default function EditRequest() {
         {apiError && <div className={`${errorClass} mb-6`}>{apiError}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-
-          {/* ── Patient info ─────────────────── */}
           <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest mb-4">
             Patient information
           </p>
@@ -211,8 +208,6 @@ export default function EditRequest() {
               {err("requiredByDate") && <p className="text-[#dc2626] text-xs mt-1">{err("requiredByDate")}</p>}
             </div>
           </div>
-
-          {/* ── Hospital info ─────────────────── */}
           <div className="border-t border-[#e4e4e4] my-6" />
           <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest mb-4">
             Hospital information
@@ -242,8 +237,6 @@ export default function EditRequest() {
               {err("state") && <p className="text-[#dc2626] text-xs mt-1">{err("state")}</p>}
             </div>
           </div>
-
-          {/* ── Contact & urgency ─────────────── */}
           <div className="border-t border-[#e4e4e4] my-6" />
           <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest mb-4">
             Contact & urgency
@@ -279,8 +272,6 @@ export default function EditRequest() {
               GREEN = routine · YELLOW = moderate · RED = critical · BLACK = catastrophic
             </p>
           </div>
-
-          {/* ── Actions ───────────────────────── */}
           <div className="flex gap-3 mt-8">
             <button
               type="submit"

@@ -1,25 +1,13 @@
-// src/pages/public/OpenRequests.jsx
-// Public page — no auth required.
-// Shows all OPEN blood requests with blood group + state filters.
+//public page — no auth required
+//shows all OPEN blood requests with blood group + alert level filters
 
 import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import RequestCard from "../../components/RequestCard";
 import {
-  pageBackground,
-  pageWrapper,
-  pageTitleClass,
-  bodyText,
-  mutedText,
-  selectClass,
-  inputClass,
-  emptyStateClass,
-  loadingClass,
-  errorClass,
-  divider,
+  pageBackground, pageWrapper, pageTitleClass, bodyText, mutedText,
+  selectClass, inputClass, emptyStateClass, loadingClass, errorClass,
   requestGrid,
-  sectionHeader,
-  sectionTitle,
 } from "../../styles/common";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -31,7 +19,7 @@ export default function OpenRequests() {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState("");
 
-  // Filters
+  //filters
   const [bloodGroup, setBloodGroup] = useState("");
   const [alertLevel, setAlertLevel] = useState("");
   const [search, setSearch]         = useState("");
@@ -53,7 +41,7 @@ export default function OpenRequests() {
     fetchRequests();
   }, [fetchRequests]);
 
-  // Client-side filtering
+  //client-side filtering
   useEffect(() => {
     let list = [...requests];
     if (bloodGroup) list = list.filter((r) => r.bloodGroup === bloodGroup);
@@ -97,6 +85,7 @@ export default function OpenRequests() {
         {/* Filters */}
         <div className="bg-[#f4f4f4] rounded-xl p-5 mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
             {/* Search */}
             <input
               type="text"
@@ -129,9 +118,10 @@ export default function OpenRequests() {
                 <option key={al} value={al}>{al}</option>
               ))}
             </select>
+
           </div>
 
-          {/* Filter status row */}
+          {/* Filter status */}
           <div className="flex items-center justify-between mt-3">
             <p className={mutedText}>
               {loading ? "Loading…" : `${filtered.length} request${filtered.length !== 1 ? "s" : ""} found`}
@@ -151,10 +141,7 @@ export default function OpenRequests() {
         {error && (
           <div className={`${errorClass} mb-6`}>
             {error}{" "}
-            <button
-              onClick={fetchRequests}
-              className="underline font-semibold ml-1 cursor-pointer"
-            >
+            <button onClick={fetchRequests} className="underline font-semibold ml-1 cursor-pointer">
               Retry
             </button>
           </div>

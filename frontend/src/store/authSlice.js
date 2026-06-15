@@ -1,14 +1,12 @@
-// src/store/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../api/axiosInstance";
 
-// ── Async Thunks ─────────────────────────────────────
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.post("/auth/login", credentials);
-      // save token to localStorage for persistence across page refreshes
+      //save token to localStorage
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);
       }
@@ -25,7 +23,7 @@ export const logoutUser = createAsyncThunk(
     try {
       await axiosInstance.get("/auth/logout");
     } catch (err) {
-      // even if backend call fails, clear local token
+      //even if backend call fails, clear local token
     } finally {
       localStorage.removeItem("token");
     }
@@ -36,19 +34,20 @@ export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
   async (_, { rejectWithValue }) => {
     try {
-      // if no token in localStorage, skip the network call entirely
+      //if no token in localStorage, skip the network call entirely
       const token = localStorage.getItem("token");
       if (!token) return rejectWithValue("No token");
       const res = await axiosInstance.get("/auth/check-auth");
       return res.data;
     } catch (err) {
-      localStorage.removeItem("token");
+      //only remove token on 401 — not on network errors (e.g. backend cold start)
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+      }
       return rejectWithValue(err.response?.data?.message || "Not authenticated");
     }
   }
 );
-
-// ── Slice ─────────────────────────────────────────────
 
 const authSlice = createSlice({
   name: "auth",
@@ -66,7 +65,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
 
-    // ── Login ──────────────────────────────────────
+    //login
     builder
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
@@ -83,7 +82,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       });
 
-    // ── Logout ─────────────────────────────────────
+    //logout
     builder
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
@@ -92,7 +91,7 @@ const authSlice = createSlice({
         state.loading = false;
       });
 
-    // ── Check Auth (session restore on page load) ──
+    //check auth on page load
     builder
       .addCase(checkAuth.pending, (state) => {
         state.loading = true;

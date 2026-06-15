@@ -1,5 +1,3 @@
-// src/pages/requester/CreateRequest.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
@@ -24,7 +22,7 @@ const STATES = [
   "Daman and Diu","Delhi","Lakshadweep","Puducherry","Jammu and Kashmir","Ladakh",
 ];
 
-// Minimum date = today
+//minimum date = today
 const today = new Date().toISOString().split("T")[0];
 
 export default function CreateRequest() {
@@ -90,8 +88,6 @@ export default function CreateRequest() {
         {apiError && <div className={`${errorClass} mb-6`}>{apiError}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-
-          {/* ── Patient info ─────────────────── */}
           <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest mb-4">
             Patient information
           </p>
@@ -156,8 +152,6 @@ export default function CreateRequest() {
               {err("requiredByDate") && <p className="text-[#dc2626] text-xs mt-1">{err("requiredByDate")}</p>}
             </div>
           </div>
-
-          {/* ── Hospital info ─────────────────── */}
           <div className="border-t border-[#e4e4e4] my-6" />
           <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest mb-4">
             Hospital information
@@ -187,8 +181,6 @@ export default function CreateRequest() {
               {err("state") && <p className="text-[#dc2626] text-xs mt-1">{err("state")}</p>}
             </div>
           </div>
-
-          {/* ── Contact info ──────────────────── */}
           <div className="border-t border-[#e4e4e4] my-6" />
           <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest mb-4">
             Contact & urgency
@@ -226,8 +218,6 @@ export default function CreateRequest() {
               GREEN = routine · YELLOW = moderate · RED = critical · BLACK = catastrophic
             </p>
           </div>
-
-          {/* ── Actions ───────────────────────── */}
           <div className="flex gap-3 mt-8">
             <button
               type="submit"

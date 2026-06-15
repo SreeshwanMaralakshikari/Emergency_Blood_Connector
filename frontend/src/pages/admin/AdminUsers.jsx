@@ -1,5 +1,4 @@
-// src/pages/admin/AdminUsers.jsx
-// View all users with role filter tabs. Activate / deactivate any user.
+//shows all users across role tabs with search — admin can activate or deactivate any account
 
 import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../api/axiosInstance";
@@ -119,7 +118,7 @@ export default function AdminUsers() {
     if (t) fetchUsers(t.endpoint);
   }, [tab, fetchUsers]);
 
-  // Client-side search
+  //client-side search
   useEffect(() => {
     if (!search.trim()) { setFiltered(users); return; }
     const q = search.toLowerCase();
@@ -139,7 +138,7 @@ export default function AdminUsers() {
         isUserActive: !currentlyActive,
       });
       toast.success(`User ${currentlyActive ? "deactivated" : "activated"} successfully.`);
-      // Update local state — no full refetch needed
+      //update local state immediately
       setUsers((prev) =>
         prev.map((u) =>
           u._id === userId ? { ...u, isUserActive: !currentlyActive } : u

@@ -1,5 +1,3 @@
-// src/pages/donor/Badges.jsx
-
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import {
@@ -8,7 +6,7 @@ import {
   badgeGrid, badgeCard, badgeCardEarned, badgeName,
 } from "../../styles/common";
 
-// Badge icon map — domain-relevant icons for each badge type
+//badge icon map — domain-relevant icons for each badge type
 const BADGE_ICONS = {
   "First Donation":  "🩸",
   "5 Donations":     "⭐",
@@ -43,7 +41,7 @@ function BadgeCard({ name, earned }) {
   );
 }
 
-// All possible badges in order — used to show locked ones too
+//all possible badges in order — used to show locked ones too
 const ALL_BADGES = [
   "First Donation", "5 Donations", "10 Donations", "25 Donations", "50 Donations",
   "100 Points", "500 Points", "1000 Points",
@@ -57,7 +55,7 @@ export default function Badges() {
   useEffect(() => {
     const load = async () => {
       try {
-        // Backend sends: { badges: [...earned badge names], donationsCount, totalPoints, donorLevel }
+        //payload: { badges:[...], donationsCount, totalPoints, donorLevel }
         const res = await axiosInstance.get("/donor-api/badges");
         setData(res.data?.payload);
       } catch (err) {
@@ -69,7 +67,7 @@ export default function Badges() {
     load();
   }, []);
 
-  // Backend sends flat array of earned badge names under 'badges'
+  //badges is a flat array of earned badge name strings
   const earnedSet = new Set(data?.badges || []);
   const earnedCount = earnedSet.size;
 

@@ -4,13 +4,15 @@ import {verifyToken} from '../middlewares/verifyToken.js'
 
 export const notificationApp=exp.Router();
 
-// Get My Notifications — GET /notification-api/my-notifications
+
+// GET MY NOTIFICATIONS
 notificationApp.get("/my-notifications",verifyToken(),async(req,res,next)=>{
     try
     {
-        // get all notifications for this user sorted by newest first
+        //get all notifications for this user sorted by newest first
         const notifications=await NotificationModel.find({userId:req.user.userId}).sort({createdAt:-1});
-        // send res
+
+        //send res
         res.status(200).json({message:"Notifications Fetched Successfully",payload:notifications});
     }
     catch(err)
@@ -19,13 +21,15 @@ notificationApp.get("/my-notifications",verifyToken(),async(req,res,next)=>{
     }
 });
 
-// Get Unread Count — GET /notification-api/unread-count
+
+// GET UNREAD COUNT
 notificationApp.get("/unread-count",verifyToken(),async(req,res,next)=>{
     try
     {
-        // count unread notifications for this user
+        //count unread notifications for this user
         const count=await NotificationModel.countDocuments({userId:req.user.userId,isRead:false});
-        // send res
+
+        //send res
         res.status(200).json({unreadCount:count});
     }
     catch(err)
@@ -34,21 +38,24 @@ notificationApp.get("/unread-count",verifyToken(),async(req,res,next)=>{
     }
 });
 
-// Mark Notification As Read — PUT /notification-api/mark-read/:id
+
+// MARK NOTIFICATION AS READ
 notificationApp.put("/mark-read/:id",verifyToken(),async(req,res,next)=>{
     try
     {
-        // find and update notification (scoped to this user for security)
+        //find and update notification (scoped to this user for security)
         const notification=await NotificationModel.findOneAndUpdate(
             {_id:req.params.id,userId:req.user.userId},
             {isRead:true},
             {new:true}
         );
+
         if(!notification)
         {
             return res.status(404).json({message:"Notification Not Found"});
         }
-        // send res
+
+        //send res
         res.status(200).json({message:"Notification Marked As Read",payload:notification});
     }
     catch(err)
@@ -57,7 +64,8 @@ notificationApp.put("/mark-read/:id",verifyToken(),async(req,res,next)=>{
     }
 });
 
-// Health Check — GET /notification-api/
+
+// HEALTH CHECK
 notificationApp.get("/",(req,res)=>{
     res.json({message:"Notification API Working"});
 });

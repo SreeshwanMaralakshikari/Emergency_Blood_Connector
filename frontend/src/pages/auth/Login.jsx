@@ -1,5 +1,3 @@
-// src/pages/auth/Login.jsx
-
 import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,15 +18,12 @@ import {
   formCard,
   formTitle,
   formGroup,
-  formRow,
   labelClass,
   inputClass,
   submitBtn,
   errorClass,
   linkClass,
   mutedText,
-  bodyText,
-  bloodGroupBadge,
 } from "../../styles/common";
 
 export default function Login() {
@@ -46,7 +41,7 @@ export default function Login() {
     formState: { errors },
   } = useForm();
 
-  // Redirect after successful login
+  //navigation logic — only run after a real login, not on checkAuth restore
   useEffect(() => {
     if (!loginAttempted.current || !isAuth) return;
     switch (role) {

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 //factory function — returns middleware for allowed roles
 export const verifyToken=(...allowedRoles)=>{
     return (req,res,next)=>{
+
         //get token from Authorization header (Bearer <token>)
         const authHeader=req.headers.authorization;
         const token=authHeader && authHeader.startsWith("Bearer ")
@@ -13,6 +14,7 @@ export const verifyToken=(...allowedRoles)=>{
         {
             return res.status(401).json({message:"Please Login First"});
         }
+
         try
         {
             //verify token

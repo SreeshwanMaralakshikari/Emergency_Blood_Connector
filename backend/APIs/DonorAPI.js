@@ -12,20 +12,23 @@ import {createNotification} from '../utils/createNotification.js'
 
 export const donorApp=exp.Router();
 
-// Get My Matched Requests — GET /donor-api/my-matched-requests
+
+// GET MY MATCHED REQUESTS
 donorApp.get("/my-matched-requests",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
-        // get donor from db
+        //get donor from db
         const donor=await UserModel.findById(req.user.userId);
         if(!donor)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // get open requests in donor's state then filter by blood compatibility
+
+        //get open requests in donor's state then filter by blood compatibility
         const allOpenRequests=await BloodRequestModel.find({status:"OPEN",state:donor.state}).sort({priorityScore:-1,createdAt:-1});
         const matchedRequests=allOpenRequests.filter((request)=>canDonate(donor.bloodGroup,request.bloodGroup));
-        // send res
+
+        //send res
         res.status(200).json({message:"Matched Requests Fetched Successfully",payload:matchedRequests});
     }
     catch(err)
@@ -34,16 +37,19 @@ donorApp.get("/my-matched-requests",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Get My Accepted Requests — GET /donor-api/my-accepted-requests
+
+// GET MY ACCEPTED REQUESTS
 donorApp.get("/my-accepted-requests",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
         const donorId=req.user.userId;
-        // get requests accepted by this donor
+
+        //get requests accepted by this donor
         const requests=await BloodRequestModel.find({
             acceptedDonors:{$elemMatch:{donorId}}
         }).sort({priorityScore:-1,createdAt:-1});
-        // format response with acceptance timestamp
+
+        //format response with acceptance timestamp
         const formattedRequests=requests.map((request)=>{
             const donorAcceptance=request.acceptedDonors.find(
                 (donorObj)=>String(donorObj.donorId)===String(donorId)
@@ -64,7 +70,8 @@ donorApp.get("/my-accepted-requests",verifyToken("DONOR"),async(req,res,next)=>{
                 acceptedAt:donorAcceptance?.acceptedAt
             };
         });
-        // send res
+
+        //send res
         res.status(200).json({message:"Accepted Requests Fetched Successfully",payload:formattedRequests});
     }
     catch(err)
@@ -73,14 +80,17 @@ donorApp.get("/my-accepted-requests",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Get Donation History — GET /donor-api/donation-history
+
+// GET DONATION HISTORY
 donorApp.get("/donation-history",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
         const donorId=req.user.userId;
-        // get all donations by this donor sorted by date
+
+        //get all donations by this donor sorted by date
         const donations=await DonationModel.find({donorId}).sort({donationDate:-1});
-        // send res
+
+        //send res
         res.status(200).json({message:"Donation History Fetched Successfully",payload:donations});
     }
     catch(err)
@@ -89,19 +99,22 @@ donorApp.get("/donation-history",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Get My Badges — GET /donor-api/badges
+
+// GET MY BADGES
 donorApp.get("/badges",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
-        // get donor stats from db
+        //get donor stats from db
         const donor=await UserModel.findById(req.user.userId).select("donorLevel totalPoints donationsCount");
         if(!donor)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // calculate badges based on current stats
+
+        //calculate badges based on current stats
         const badges=calculateBadges(donor.donationsCount,donor.totalPoints);
-        // send res
+
+        //send res
         res.status(200).json({
             message:"Badges Fetched Successfully",
             payload:{donationsCount:donor.donationsCount,totalPoints:donor.totalPoints,donorLevel:donor.donorLevel,badges}
@@ -113,15 +126,17 @@ donorApp.get("/badges",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Get Leaderboard (public) — GET /donor-api/leaderboard
+
+// GET LEADERBOARD
 donorApp.get("/leaderboard",async(req,res,next)=>{
     try
     {
-        // get all donors sorted by points then donation count
+        //get all donors sorted by points then donation count
         const donors=await UserModel.find({role:"DONOR"})
             .select("firstName lastName donorLevel totalPoints donationsCount")
             .sort({totalPoints:-1,donationsCount:-1});
-        // build leaderboard with rank
+
+        //build leaderboard with rank
         const leaderboard=donors.map((donor,index)=>({
             rank:index+1,
             donorId:donor._id,
@@ -130,7 +145,8 @@ donorApp.get("/leaderboard",async(req,res,next)=>{
             totalPoints:donor.totalPoints,
             donationsCount:donor.donationsCount
         }));
-        // send res
+
+        //send res
         res.status(200).json({message:"Leaderboard Fetched Successfully",payload:leaderboard});
     }
     catch(err)
@@ -139,16 +155,18 @@ donorApp.get("/leaderboard",async(req,res,next)=>{
     }
 });
 
-// Get Top 3 Donors (public) — GET /donor-api/top-donors
+
+// GET TOP 3 DONORS
 donorApp.get("/top-donors",async(req,res,next)=>{
     try
     {
-        // get top 3 donors by points
+        //get top 3 donors by points
         const topDonors=await UserModel.find({role:"DONOR"})
             .select("firstName lastName donorLevel totalPoints donationsCount")
             .sort({totalPoints:-1,donationsCount:-1})
             .limit(3);
-        // send res
+
+        //send res
         res.status(200).json({message:"Top Donors Fetched Successfully",payload:topDonors});
     }
     catch(err)
@@ -157,23 +175,28 @@ donorApp.get("/top-donors",async(req,res,next)=>{
     }
 });
 
-// Get My Rank — GET /donor-api/my-rank
+
+// GET MY RANK
 donorApp.get("/my-rank",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
         const donorId=req.user.userId;
-        // get all donors sorted by points to determine rank
+
+        //get all donors sorted by points to determine rank
         const donors=await UserModel.find({role:"DONOR"})
             .select("firstName lastName donorLevel totalPoints donationsCount")
             .sort({totalPoints:-1,donationsCount:-1});
-        // find rank and donor info
-        const rank=donors.findIndex((donor)=>String(donor._id)===String(donorId))+1;
-        const donor=donors.find((donor)=>String(donor._id)===String(donorId));
-        if(!donor)
+
+        //find rank and donor info
+        const donorIndex=donors.findIndex((donor)=>String(donor._id)===String(donorId));
+        const donor=donors[donorIndex];
+        if(!donor || donorIndex===-1)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // send res
+        const rank=donorIndex+1;
+
+        //send res
         res.status(200).json({
             message:"Rank Fetched Successfully",
             payload:{
@@ -192,19 +215,22 @@ donorApp.get("/my-rank",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Get My Achievements — GET /donor-api/achievements
+
+// GET MY ACHIEVEMENTS
 donorApp.get("/achievements",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
-        // get donor stats from db
+        //get donor stats from db
         const donor=await UserModel.findById(req.user.userId).select("donationsCount totalPoints donorLevel");
         if(!donor)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // calculate badges
+
+        //calculate badges
         const badges=calculateBadges(donor.donationsCount,donor.totalPoints);
-        // send res
+
+        //send res
         res.status(200).json({
             message:"Achievements Fetched Successfully",
             payload:{
@@ -222,28 +248,30 @@ donorApp.get("/achievements",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Donor Dashboard — GET /donor-api/dashboard
+
+// DONOR DASHBOARD
 donorApp.get("/dashboard",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
-        // get donor from db
+        //get donor from db
         const donor=await UserModel.findById(req.user.userId).select("-password");
         if(!donor)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // count blood-compatible open requests in donor's state
+
+        //count blood-compatible open requests in donor's state
         const totalMatchedRequests=(
             await BloodRequestModel.find({status:"OPEN",state:donor.state})
         ).filter((request)=>canDonate(donor.bloodGroup,request.bloodGroup)).length;
-        // get badges for badge count
-        const donorForBadges=await UserModel.findById(req.user.userId).select("badges");
-        // count accepted and completed donations
+
+        //count accepted and completed donations
         const totalAcceptedRequests=await BloodRequestModel.countDocuments({
             acceptedDonors:{$elemMatch:{donorId:donor._id}}
         });
         const totalDonations=await DonationModel.countDocuments({donorId:donor._id});
-        // send res
+
+        //send res
         res.status(200).json({
             message:"Dashboard Data",
             payload:{
@@ -253,7 +281,8 @@ donorApp.get("/dashboard",verifyToken("DONOR"),async(req,res,next)=>{
                 totalPoints:donor.totalPoints,
                 donationsCount:donor.donationsCount,
                 isAvailable:donor.isAvailable,
-                badges:donorForBadges?.badges || [],
+                badges:donor.badges || [],
+                lastDonationDate:donor.lastDonationDate,
                 nextEligibleDonationDate:donor.nextEligibleDonationDate,
                 totalMatchedRequests,
                 totalAcceptedRequests,
@@ -267,33 +296,41 @@ donorApp.get("/dashboard",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Accept Blood Request — PUT /donor-api/accept-request
+
+// ACCEPT BLOOD REQUEST
 donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
         const {requestNumber}=req.body;
         const donorId=req.user.userId;
-        // get donor from db
+
+        //get donor from db
         const donor=await UserModel.findById(donorId);
         if(!donor)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // check donation cooldown
+
+        //check donation cooldown
         if(!donor.isAvailable)
         {
+            const eligibleDate=donor.nextEligibleDonationDate
+                ? new Date(donor.nextEligibleDonationDate).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})
+                : "soon";
             return res.status(400).json({
-                message:"Donation cooldown active",
+                message:`You are in a donation cooldown period. You can donate again from ${eligibleDate}.`,
                 nextEligibleDonationDate:donor.nextEligibleDonationDate
             });
         }
-        // find request
+
+        //find request
         const request=await BloodRequestModel.findOne({requestNumber});
         if(!request)
         {
             return res.status(404).json({message:"Blood Request Not Found"});
         }
-        // validate request status
+
+        //validate request status
         if(request.status!=="OPEN")
         {
             return res.status(400).json({message:"This blood request is no longer open"});
@@ -302,24 +339,28 @@ donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
         {
             return res.status(400).json({message:"This blood request has already been fulfilled"});
         }
-        // check state and blood group eligibility
+
+        //check state and blood group eligibility
         if(request.state!==donor.state)
         {
-            return res.status(403).json({message:"You are not eligible for this request"});
+            return res.status(403).json({message:`This request is in ${request.state} but you are registered in ${donor.state}. You can only accept requests in your registered state.`});
         }
         if(!canDonate(donor.bloodGroup,request.bloodGroup))
         {
-            return res.status(403).json({message:"You are not compatible for this blood request"});
+            return res.status(403).json({message:`Your blood group (${donor.bloodGroup}) is not compatible with this request (needs ${request.bloodGroup}).`});
         }
-        // check if already accepted
+
+        //check if already accepted
         if(request.acceptedDonors.some((donorObj)=>String(donorObj.donorId)===String(donorId)))
         {
             return res.status(400).json({message:"You have already accepted this request"});
         }
-        // add donor to accepted list
+
+        //add donor to accepted list
         request.acceptedDonors.push({donorId,acceptedAt:new Date()});
         await request.save();
-        // notify requester (non-critical)
+
+        //notify requester (non-critical)
         try
         {
             if(request.requestCreatedBy)
@@ -336,7 +377,8 @@ donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
         {
             console.error(error);
         }
-        // send res
+
+        //send res
         res.status(200).json({message:"Donation Request Accepted Successfully",payload:request});
     }
     catch(err)
@@ -345,19 +387,22 @@ donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Complete Donation — PUT /donor-api/complete-donation
+
+// COMPLETE DONATION
 donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
         const {requestNumber}=req.body;
         const donorId=req.user.userId;
-        // find request
+
+        //find request
         const request=await BloodRequestModel.findOne({requestNumber});
         if(!request)
         {
             return res.status(404).json({message:"Blood Request Not Found"});
         }
-        // validate request status
+
+        //validate request status
         if(request.status!=="OPEN")
         {
             return res.status(400).json({message:"This blood request is no longer open"});
@@ -366,36 +411,45 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
         {
             return res.status(400).json({message:"This blood request has already been fulfilled"});
         }
-        // check if donor accepted this request
+
+        //check if donor accepted this request
         const donorAccepted=request.acceptedDonors.some((donorObj)=>String(donorObj.donorId)===String(donorId));
         if(!donorAccepted)
         {
             return res.status(400).json({message:"You have not accepted this request"});
         }
-        // check if already completed
+
+        //check if already completed
         if(request.completedDonors.some((id)=>String(id)===String(donorId)))
         {
             return res.status(400).json({message:"Donation already completed"});
         }
-        // get donor from db
+
+        //get donor from db
         const donor=await UserModel.findById(donorId);
         if(!donor)
         {
             return res.status(404).json({message:"Donor Not Found"});
         }
-        // check availability
+
+        //check availability
         if(!donor.isAvailable)
         {
+            const eligibleDate=donor.nextEligibleDonationDate
+                ? new Date(donor.nextEligibleDonationDate).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})
+                : "soon";
             return res.status(400).json({
-                message:"Donation cooldown active",
+                message:`You are in a donation cooldown period. You can donate again from ${eligibleDate}.`,
                 nextEligibleDonationDate:donor.nextEligibleDonationDate
             });
         }
-        // ── Calculate donation details ──────────────────────
+
+        //calculate donation details
         const donationDate=new Date();
         const pointsAwarded=calculatePoints(request.alertLevel);
         const nextEligibleDonationDate=calculateNextEligibleDate(donationDate);
-        // ── Create donation record ──────────────────────────
+
+        //create donation record
         const donationRecord=await DonationModel.create({
             donorId:donor._id,
             bloodRequestId:request._id,
@@ -408,7 +462,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
             status:"CONFIRMED",
             isVerified:true
         });
-        // ── Update donor stats ──────────────────────────────
+
+        //update donor stats
         const oldBadges=donor.badges || [];
         donor.totalPoints+=pointsAwarded;
         donor.donationsCount+=1;
@@ -420,7 +475,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
         donor.isAvailable=false;
         donor.availabilityUpdatedAt=donationDate;
         await donor.save();
-        // ── Update request ──────────────────────────────────
+
+        //update request
         request.completedDonors.push(donor._id);
         request.acceptedDonors=request.acceptedDonors.filter((donorObj)=>String(donorObj.donorId)!==String(donorId));
         request.unitsFulfilled+=1;
@@ -429,8 +485,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
             request.status="FULFILLED";
         }
         await request.save();
-        // ── Notifications (non-critical) ────────────────────
-        // notify donor of points earned
+
+        //notify donor of points earned (non-critical)
         try
         {
             await createNotification(donor._id,"Donation Completed",`You earned ${pointsAwarded} points for donating blood`,"DONATION_COMPLETED");
@@ -439,7 +495,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
         {
             console.error(error);
         }
-        // notify requester of donation
+
+        //notify requester of donation (non-critical)
         try
         {
             if(request.requestCreatedBy)
@@ -456,7 +513,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
         {
             console.error(error);
         }
-        // notify for each new badge earned
+
+        //notify for each new badge earned (non-critical)
         const earnedBadges=newBadges.filter((badge)=>!oldBadges.includes(badge));
         for(const badge of earnedBadges)
         {
@@ -469,10 +527,12 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
                 console.error(error);
             }
         }
-        // prepare response
+
+        //prepare response
         const donorObj=donor.toObject();
         delete donorObj.password;
-        // send res
+
+        //send res
         res.status(200).json({message:"Donation Completed Successfully",donation:donationRecord,donor:donorObj,request});
     }
     catch(err)
@@ -481,7 +541,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
     }
 });
 
-// Health Check — GET /donor-api/
+
+// HEALTH CHECK
 donorApp.get("/",(req,res)=>{
     res.json({message:"Donor API Working"});
 });

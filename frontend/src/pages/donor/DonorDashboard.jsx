@@ -1,5 +1,3 @@
-// src/pages/donor/DonorDashboard.jsx
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
@@ -34,12 +32,19 @@ export default function DonorDashboard() {
     const load = async () => {
       try {
         setLoading(true);
-        const [dashRes, rankRes] = await Promise.all([
+        const [dashRes, rankRes] = await Promise.allSettled([
           axiosInstance.get("/donor-api/dashboard"),
           axiosInstance.get("/donor-api/my-rank"),
         ]);
-        setDashboard(dashRes.data?.payload);
-        setRank(rankRes.data?.payload);
+        if (dashRes.status === "fulfilled") {
+          setDashboard(dashRes.value.data?.payload);
+        } else {
+          setError(dashRes.reason?.response?.data?.message || "Failed to load dashboard.");
+        }
+        if (rankRes.status === "fulfilled") {
+          setRank(rankRes.value.data?.payload);
+        }
+        //rank failure is silent — dashboard still loads
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load dashboard.");
       } finally {
@@ -53,18 +58,16 @@ export default function DonorDashboard() {
     ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
     : "";
 
-  const isAvailable = user?.isAvailable ?? false;
-
   if (loading) return <div className={pageBackground}><p className={`${loadingClass} pt-32`}>Loading dashboard…</p></div>;
   if (error)   return <div className={pageBackground}><div className={`${errorClass} max-w-xl mx-auto mt-20`}>{error}</div></div>;
 
   const d = dashboard || {};
+  //read isAvailable from dashboard payload (fresh), fallback to Redux user
+  const isAvailable = d.isAvailable ?? user?.isAvailable ?? false;
 
   return (
     <div className={pageBackground}>
       <div className={pageWrapper}>
-
-        {/* ── Profile strip ─────────────────────── */}
         <div className="flex items-start gap-5 mb-10">
           <div className={avatarLg}>{initials}</div>
           <div className="flex flex-col gap-1.5">
@@ -88,8 +91,6 @@ export default function DonorDashboard() {
             <p className="text-xs text-[#9e9e9e]">{user?.bloodGroup} · {user?.state}</p>
           </div>
         </div>
-
-        {/* ── Stats strip ───────────────────────── */}
         <div className={`${dashStatsGrid} mb-10`}>
           <StatCard label="Total donations"   value={d.donationsCount}  accent />
           <StatCard label="Total points"      value={d.totalPoints} />
@@ -97,8 +98,6 @@ export default function DonorDashboard() {
           <StatCard label="Donor level"       value={d.donorLevel} />
           <StatCard label="Badges earned"     value={d.badges?.length ?? 0} />
         </div>
-
-        {/* ── Eligibility card ──────────────────── */}
         <div className="bg-[#f4f4f4] rounded-xl p-6 mb-10">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
@@ -134,8 +133,6 @@ export default function DonorDashboard() {
             </Link>
           </div>
         </div>
-
-        {/* ── Quick links ───────────────────────── */}
         <div className={sectionHeader}>
           <h2 className={sectionTitle}>My donor activity</h2>
         </div>
@@ -157,8 +154,6 @@ export default function DonorDashboard() {
         </div>
 
         <div className={divider} />
-
-        {/* ── Leaderboard teaser ─────────────────── */}
         <div className="flex items-center justify-between">
           <div>
             <h2 className={sectionTitle}>Leaderboard</h2>
