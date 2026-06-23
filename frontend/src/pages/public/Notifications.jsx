@@ -17,7 +17,8 @@ import { timeAgo, formatDateTime } from "../../utils/formatDate";
 const TYPE_LABELS = {
   REQUEST_CREATED:    "Request created",
   REQUEST_ACCEPTED:   "Request accepted",
-  DONATION_COMPLETED: "Donation completed",
+  DONATION_COMPLETED: "Donation submitted",
+  DONATION_CONFIRMED: "Donation confirmed",
   BADGE_EARNED:       "Badge earned",
   GENERAL:            "General",
 };

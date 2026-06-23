@@ -6,7 +6,7 @@ export const notificationApp=exp.Router();
 
 
 // GET MY NOTIFICATIONS
-notificationApp.get("/my-notifications",verifyToken(),async(req,res,next)=>{
+notificationApp.get("/my-notifications",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
     try
     {
         //get all notifications for this user sorted by newest first
@@ -23,7 +23,7 @@ notificationApp.get("/my-notifications",verifyToken(),async(req,res,next)=>{
 
 
 // GET UNREAD COUNT
-notificationApp.get("/unread-count",verifyToken(),async(req,res,next)=>{
+notificationApp.get("/unread-count",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
     try
     {
         //count unread notifications for this user
@@ -40,7 +40,7 @@ notificationApp.get("/unread-count",verifyToken(),async(req,res,next)=>{
 
 
 // MARK NOTIFICATION AS READ
-notificationApp.put("/mark-read/:id",verifyToken(),async(req,res,next)=>{
+notificationApp.put("/mark-read/:id",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
     try
     {
         //find and update notification (scoped to this user for security)

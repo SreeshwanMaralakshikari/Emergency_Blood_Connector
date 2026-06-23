@@ -272,6 +272,7 @@ export const getNotifDotClass = (type) => {
     case "REQUEST_CREATED":    return notifDotRequestCreated;
     case "REQUEST_ACCEPTED":   return notifDotRequestAccepted;
     case "DONATION_COMPLETED": return notifDotDonationComplete;
+    case "DONATION_CONFIRMED": return notifDotDonationComplete;
     case "BADGE_EARNED":       return notifDotBadgeEarned;
     default:                   return notifDotGeneral;
   }

@@ -110,9 +110,19 @@ export default function Navbar() {
           {/* Auth controls */}
           {isAuth ? (
             <div className="flex items-center gap-3 ml-2">
-              <div className={avatar} title={`${user?.firstName} ${user?.lastName}`}>
-                {initials}
-              </div>
+              {/* Show profile image if available, otherwise show initials avatar */}
+              {user?.profileImageUrl ? (
+                <img
+                  src={user.profileImageUrl}
+                  alt={`${user?.firstName} ${user?.lastName}`}
+                  title={`${user?.firstName} ${user?.lastName}`}
+                  className="w-8 h-8 rounded-full object-cover border border-[#e4e4e4] shrink-0"
+                />
+              ) : (
+                <div className={avatar} title={`${user?.firstName} ${user?.lastName}`}>
+                  {initials}
+                </div>
+              )}
               <button onClick={handleLogout} className={secondaryBtn}>Logout</button>
             </div>
           ) : (

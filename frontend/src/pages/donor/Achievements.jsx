@@ -15,7 +15,7 @@ const LEVELS = [
   { name: "Bronze",   minPoints: 11   },
   { name: "Silver",   minPoints: 26   },
   { name: "Gold",     minPoints: 51   },
-  { name: "Platinum", minPoints: 101  },
+  { name: "Platinum", minPoints: 100  },
   { name: "Diamond",  minPoints: 1000 },
 ];
 

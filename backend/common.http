@@ -2,6 +2,8 @@
 GET http://localhost:5000/auth
 
 ### Register Requester
+### NOTE: /auth/register now accepts multipart/form-data (for optional profile image upload).
+### JSON requests still work (multer skips non-multipart bodies) — but use FormData in production.
 POST http://localhost:5000/auth/register
 Content-Type: application/json
 
@@ -42,7 +44,7 @@ Content-Type: application/json
 
 ### Check Auth
 GET http://localhost:5000/auth/check-auth
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODg4Njg0MGMzMzZiMDc5OGQ4NWIiLCJlbWFpbCI6ImFkbWluQHRlc3QuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzgxMzY5MDc4LCJleHAiOjE3ODE5NzM4Nzh9.hsXRbZ8laAo_PrmHMZnAnfmRr3LTzIAmlqlwB26y8qo
+Authorization: Bearer YOUR_TOKEN_HERE
 
 ### Logout
 GET http://localhost:5000/auth/logout

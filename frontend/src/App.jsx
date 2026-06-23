@@ -83,22 +83,22 @@ export default function App() {
           <ProtectedRoute><Notifications /></ProtectedRoute>
         } />
         <Route path="/donor/dashboard" element={
-          <ProtectedRoute allowedRoles={["DONOR", "ADMIN"]}>
+          <ProtectedRoute allowedRoles={["DONOR"]}>
             <DonorDashboard />
           </ProtectedRoute>
         } />
         <Route path="/donor/history" element={
-          <ProtectedRoute allowedRoles={["DONOR", "ADMIN"]}>
+          <ProtectedRoute allowedRoles={["DONOR"]}>
             <DonationHistory />
           </ProtectedRoute>
         } />
         <Route path="/donor/badges" element={
-          <ProtectedRoute allowedRoles={["DONOR", "ADMIN"]}>
+          <ProtectedRoute allowedRoles={["DONOR"]}>
             <Badges />
           </ProtectedRoute>
         } />
         <Route path="/donor/achievements" element={
-          <ProtectedRoute allowedRoles={["DONOR", "ADMIN"]}>
+          <ProtectedRoute allowedRoles={["DONOR"]}>
             <Achievements />
           </ProtectedRoute>
         } />

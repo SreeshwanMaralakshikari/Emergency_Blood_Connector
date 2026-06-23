@@ -20,17 +20,20 @@ function DonationRow({ donation }) {
           {donation.unitsDonated} unit{donation.unitsDonated !== 1 ? "s" : ""} donated
           {donation.donationDate ? ` · ${formatDate(donation.donationDate)}` : ""}
         </p>
-        {donation.nextEligibleDonationDate && (
+        {/* Only show next eligible date for CONFIRMED donations — cooldown is only active after confirmation */}
+        {donation.status === "CONFIRMED" && donation.nextEligibleDonationDate && (
           <p className="text-xs text-[#9e9e9e]">
             Next eligible: {formatDate(donation.nextEligibleDonationDate)}
           </p>
         )}
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className={pointsPill}>+{donation.pointsAwarded} pts</span>
-        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#16a34a]/10
-                         text-[#15803d] uppercase tracking-wide">
-          {donation.status}
+        {/* Only show points pill for confirmed donations — pending ones have not been awarded yet */}
+        {donation.status === "CONFIRMED" && (
+          <span className={pointsPill}>+{donation.pointsAwarded} pts</span>
+        )}
+        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${donation.status === "CONFIRMED" ? "bg-[#16a34a]/10 text-[#15803d]" : "bg-[#d97706]/10 text-[#d97706]"}`}>
+          {donation.status === "PENDING" ? "Awaiting confirmation" : donation.status}
         </span>
       </div>
     </div>
@@ -57,8 +60,9 @@ export default function DonationHistory() {
   }, []);
 
   //totals
-  const totalPoints = donations.reduce((s, d) => s + (d.pointsAwarded || 0), 0);
-  const totalUnits  = donations.reduce((s, d) => s + (d.unitsDonated  || 0), 0);
+  //only count CONFIRMED donations for points and units (PENDING ones are not yet awarded)
+  const totalPoints = donations.filter((d) => d.status === "CONFIRMED").reduce((s, d) => s + (d.pointsAwarded || 0), 0);
+  const totalUnits  = donations.filter((d) => d.status === "CONFIRMED").reduce((s, d) => s + (d.unitsDonated  || 0), 0);
 
   return (
     <div className={pageBackground}>
@@ -79,7 +83,7 @@ export default function DonationHistory() {
         {!loading && donations.length > 0 && (
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[
-              { label: "Total donations", value: donations.length },
+              { label: "Confirmed donations", value: donations.filter((d) => d.status === "CONFIRMED").length },
               { label: "Units donated",   value: totalUnits },
               { label: "Points earned",   value: totalPoints },
             ].map((s) => (

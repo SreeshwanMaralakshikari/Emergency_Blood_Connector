@@ -69,7 +69,16 @@ export default function RequesterDashboard() {
       <div className={pageWrapper}>
         <div className="flex items-start justify-between gap-4 mb-10 flex-wrap">
           <div className="flex items-start gap-5">
-            <div className={avatarLg}>{initials}</div>
+            {/* Show profile image if uploaded, otherwise show initials avatar */}
+            {user?.profileImageUrl ? (
+              <img
+                src={user.profileImageUrl}
+                alt={`${user?.firstName} ${user?.lastName}`}
+                className="w-16 h-16 rounded-full object-cover border-2 border-[#e4e4e4] shrink-0"
+              />
+            ) : (
+              <div className={avatarLg}>{initials}</div>
+            )}
             <div className="flex flex-col gap-1">
               <h1 className="text-2xl font-bold text-[#1a1a1a] tracking-tight">
                 {user?.firstName} {user?.lastName}

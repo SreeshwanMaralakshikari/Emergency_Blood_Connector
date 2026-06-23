@@ -62,6 +62,16 @@ app.use((req,res,next)=>{
 
 //error handling middleware
 app.use((err,req,res,next)=>{
+    //MulterError — file upload errors (size limit, unexpected field, etc.)
+    if(err.name==="MulterError")
+    {
+        return res.status(400).json({message:"error occurred",error:err.message});
+    }
+    //custom file filter error (wrong mime type — err.status set to 400 in multer.js)
+    if(err.status===400 && err.message)
+    {
+        return res.status(400).json({message:"error occurred",error:err.message});
+    }
     //ValidationError
     if(err.name==="ValidationError")
     {

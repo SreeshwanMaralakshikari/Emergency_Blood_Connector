@@ -24,8 +24,8 @@ const HOW_IT_WORKS = [
   },
   {
     step: "03",
-    title: "Donation is completed",
-    body: "After donating at the hospital, the donor marks it complete. Points and badges are awarded automatically based on the alert level.",
+    title: "Donation is confirmed",
+    body: "After donating at the hospital, the donor marks it done and notifies the requester. Once the requester confirms, points and badges are awarded based on the urgency level.",
   },
 ];
 

@@ -17,7 +17,7 @@ const notificationSchema=new Schema({
     },
     type:{
         type:String,
-        enum:["REQUEST_CREATED","REQUEST_ACCEPTED","DONATION_COMPLETED","BADGE_EARNED","GENERAL"],
+        enum:["REQUEST_CREATED","REQUEST_ACCEPTED","DONATION_COMPLETED","DONATION_CONFIRMED","BADGE_EARNED","GENERAL"],
         default:"GENERAL"
     },
     isRead:{

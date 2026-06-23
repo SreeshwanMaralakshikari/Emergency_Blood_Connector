@@ -1,51 +1,58 @@
-### Donor API Test
+### Donor API Health Check
 GET http://localhost:5000/donor-api
 
 ### Get My Matched Requests
 GET http://localhost:5000/donor-api/my-matched-requests
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUyMzMzMGVlNzg3MzhiNjdjNDIiLCJlbWFpbCI6ImRvbm9yMkB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MTM2NTQ3NCwiZXhwIjoxNzgxOTcwMjc0fQ.LkNUBuNpG4Yqs5lU7i1u6fsqTc2zrlEo_Amg5KwVP3I
+Authorization: Bearer YOUR_DONOR_TOKEN
 
 ### Accept Blood Request
 PUT http://localhost:5000/donor-api/accept-request
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODdmMGI2YWMyODU5MmU2M2Y1ODEiLCJlbWFpbCI6ImRvbm9yMTNAdGVzdC5jb20iLCJyb2xlIjoiRE9OT1IiLCJpYXQiOjE3ODEzNjg4MTksImV4cCI6MTc4MTk3MzYxOX0.FG1cGX-siq-KW56nphJUy3MpkkdMzbKmbega1lyem7k
+Authorization: Bearer YOUR_DONOR_TOKEN
 
 {
-  "requestNumber": "REQ-2026-00008"
+  "requestNumber": "REQ-2026-00001"
 }
 
 ### Complete Donation
 PUT http://localhost:5000/donor-api/complete-donation
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkODdmMGI2YWMyODU5MmU2M2Y1ODEiLCJlbWFpbCI6ImRvbm9yMTNAdGVzdC5jb20iLCJyb2xlIjoiRE9OT1IiLCJpYXQiOjE3ODEzNjg4MTksImV4cCI6MTc4MTk3MzYxOX0.FG1cGX-siq-KW56nphJUy3MpkkdMzbKmbega1lyem7k
+Authorization: Bearer YOUR_DONOR_TOKEN
 
 {
-  "requestNumber": "REQ-2026-00008"
+  "requestNumber": "REQ-2026-00001"
 }
 
-### Get My Donations
-GET http://localhost:5000/donor-api/my-donations
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUxNjMzMGVlNzg3MzhiNjdjNDEiLCJlbWFpbCI6ImRvbm9yMUB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MT2NTA2MywiZXhwIjoxNzgxOTY5ODYzfQ.4qN3Z8iBXLlCgrFRnrH3HSMo1wPmrzOilDL93-baPxE
+### Get Donation History
+GET http://localhost:5000/donor-api/donation-history
+Authorization: Bearer YOUR_DONOR_TOKEN
 
 ### Get My Badges
-GET http://localhost:5000/donor-api/my-badges
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUxNjMzMGVlNzg3MzhiNjdjNDEiLCJlbWFpbCI6ImRvbm9yMUB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MTM2MDYzNywiZXhwIjoxNzgxOTY1NDM3fQ.evzDdJckXIml8Jgy7aMdQy5E3FvYsmzXLlD7BohOQqY
+GET http://localhost:5000/donor-api/badges
+Authorization: Bearer YOUR_DONOR_TOKEN
 
-###Get Leaderboard
+### Get Leaderboard (public)
 GET http://localhost:5000/donor-api/leaderboard
 
-###Get Top Donors
+### Get Top Donors (public)
 GET http://localhost:5000/donor-api/top-donors
 
-###Get My Rank
+### Get My Rank
 GET http://localhost:5000/donor-api/my-rank
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUxNjMzMGVlNzg3MzhiNjdjNDEiLCJlbWFpbCI6ImRvbm9yMUB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MTM2MDYzNywiZXhwIjoxNzgxOTY1NDM3fQ.evzDdJckXIml8Jgy7aMdQy5E3FvYsmzXLlD7BohOQqY
+Authorization: Bearer YOUR_DONOR_TOKEN
 
-###Get My Achievements
-GET http://localhost:5000/donor-api/my-achievements
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUxNjMzMGVlNzg3MzhiNjdjNDEiLCJlbWFpbCI6ImRvbm9yMUB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MTM2MDYzNywiZXhwIjoxNzgxOTY1NDM3fQ.evzDdJckXIml8Jgy7aMdQy5E3FvYsmzXLlD7BohOQqY
+### Get My Achievements
+GET http://localhost:5000/donor-api/achievements
+Authorization: Bearer YOUR_DONOR_TOKEN
 
 ### Donor Dashboard
 GET http://localhost:5000/donor-api/dashboard
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNjc1NDI1NmNkYWM5NmY1MzAwOTUiLCJlbWFpbCI6ImRvbm9yNEB0ZXN0LmNvbSIsInJvbGUiOiJET05PUiIsImlhdCI6MTc4MTM2MDQ3MSwiZXhwIjoxNzgxOTY1MjcxfQ.P4urFE2p0sJet6hXqwuxPyLO33DmJw284CwRbCu-TQA
+Authorization: Bearer YOUR_DONOR_TOKEN
 
+### Get My Accepted Requests
+GET http://localhost:5000/donor-api/my-accepted-requests
+Authorization: Bearer YOUR_DONOR_TOKEN
+
+### Get My Matched Requests
+GET http://localhost:5000/donor-api/my-matched-requests
+Authorization: Bearer YOUR_DONOR_TOKEN

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import axiosInstance from "../../api/axiosInstance";
@@ -34,6 +34,8 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [role, setRole]       = useState("DONOR");
+  const [preview, setPreview] = useState(null);
+  const previewUrlRef         = useRef(null);
 
   const {
     register,
@@ -48,26 +50,78 @@ export default function Register() {
     setRole(watchedRole);
   }, [watchedRole]);
 
+  //revoke blob URL on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
+
   const onRegister = async (data) => {
     setApiError("");
     try {
       setLoading(true);
-      await axiosInstance.post("/auth/register", {
-        firstName:   data.firstName,
-        lastName:    data.lastName,
-        email:       data.email,
-        password:    data.password,
-        phoneNumber: data.phoneNumber,
-        bloodGroup:  data.bloodGroup,
-        state:       data.state,
-        role:        data.role,
-      });
+
+      //build FormData so the file is sent as multipart/form-data
+      //DO NOT manually set Content-Type header — the browser must set it automatically
+      //so it can include the correct boundary parameter (e.g. boundary=----xyz)
+      const formData = new FormData();
+      formData.append("firstName",   data.firstName);
+      formData.append("lastName",    data.lastName);
+      formData.append("email",       data.email);
+      formData.append("password",    data.password);
+      formData.append("phoneNumber", data.phoneNumber);
+      formData.append("bloodGroup",  data.bloodGroup);
+      formData.append("state",       data.state);
+      formData.append("role",        data.role);
+      //only append the image file if the user actually selected one
+      if (data.profileImageUrl?.[0]) {
+        formData.append("profileImageUrl", data.profileImageUrl[0]);
+      }
+
+      await axiosInstance.post("/auth/register", formData);
       toast.success("Account created! Please sign in.");
       navigate("/login");
     } catch (err) {
-      setApiError(err.response?.data?.message || "Registration failed. Please try again.");
+      //prefer the specific 'error' field (e.g. file type/size message) over the generic 'message' field
+      setApiError(err.response?.data?.error || err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  //destructure register's return so we can compose its onChange with our preview handler
+  const {
+    onChange: rhfOnChange,
+    ...profileImageRest
+  } = register("profileImageUrl", {
+    validate: {
+      fileType: (files) =>
+        !files?.[0] ||
+        ["image/jpeg", "image/png"].includes(files[0].type) ||
+        "Only JPG or PNG files are allowed",
+      fileSize: (files) =>
+        !files?.[0] ||
+        files[0].size <= 2 * 1024 * 1024 ||
+        "Image must be under 2 MB",
+    },
+  });
+
+  const handleFileChange = (e) => {
+    //call RHF's own onChange first so it tracks the value and runs validation
+    rhfOnChange(e);
+    //then update our preview
+    const file = e.target.files[0];
+    if (file) {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = URL.createObjectURL(file);
+      setPreview(previewUrlRef.current);
+    } else {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+      setPreview(null);
     }
   };
 
@@ -98,7 +152,7 @@ export default function Register() {
 
           <form onSubmit={handleSubmit(onRegister)} noValidate>
 
-            {/* Role selector — shown first, controls what fields show */}
+            {/* Role selector */}
             <div className={`${formGroup} mb-6`}>
               <label className={labelClass}>I am registering as</label>
               <div className="flex gap-3 mt-1">
@@ -245,6 +299,66 @@ export default function Register() {
                   <p className="text-[#dc2626] text-xs mt-1">{errors.state.message}</p>
                 )}
               </div>
+            </div>
+
+            {/* Profile Image — optional */}
+            <div className={formGroup}>
+              <label className={labelClass}>
+                Profile image{" "}
+                <span className="text-[#9e9e9e] normal-case font-normal">
+                  (optional · JPG or PNG · max 2 MB)
+                </span>
+              </label>
+
+              <div className="flex items-center gap-4 mt-1">
+
+                {/* Live preview circle */}
+                <div className="shrink-0">
+                  {preview ? (
+                    <img
+                      src={preview}
+                      alt="Profile preview"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[#c0152a]/30"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-[#e4e4e4] flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                           viewBox="0 0 24 24" fill="none" stroke="#9e9e9e"
+                           strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* File picker */}
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    className="block w-full text-sm text-[#6b6b6b]
+                               file:mr-4 file:py-2 file:px-4
+                               file:rounded-full file:border-0
+                               file:text-xs file:font-semibold
+                               file:bg-[#c0152a] file:text-white
+                               hover:file:bg-[#960f20]
+                               file:cursor-pointer cursor-pointer"
+                    onChange={handleFileChange}
+                    {...profileImageRest}
+                  />
+                  <p className="text-xs text-[#9e9e9e] mt-1">
+                    {preview
+                      ? "Image selected — looks good!"
+                      : "Skip this to use your initials as avatar."}
+                  </p>
+                </div>
+
+              </div>
+
+              {errors.profileImageUrl && (
+                <p className="text-[#dc2626] text-xs mt-2">{errors.profileImageUrl.message}</p>
+              )}
             </div>
 
             {/* Submit */}

@@ -269,7 +269,8 @@ donorApp.get("/dashboard",verifyToken("DONOR"),async(req,res,next)=>{
         const totalAcceptedRequests=await BloodRequestModel.countDocuments({
             acceptedDonors:{$elemMatch:{donorId:donor._id}}
         });
-        const totalDonations=await DonationModel.countDocuments({donorId:donor._id});
+        //only count confirmed donations — pending ones are not yet verified by requester
+        const totalDonations=await DonationModel.countDocuments({donorId:donor._id,status:"CONFIRMED"});
 
         //send res
         res.status(200).json({
@@ -321,6 +322,13 @@ donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
                 message:`You are in a donation cooldown period. You can donate again from ${eligibleDate}.`,
                 nextEligibleDonationDate:donor.nextEligibleDonationDate
             });
+        }
+
+        //block if donor already has a pending donation awaiting confirmation on any request
+        const hasPendingDonation=await DonationModel.exists({donorId:donor._id,status:"PENDING"});
+        if(hasPendingDonation)
+        {
+            return res.status(400).json({message:"You have a donation awaiting requester confirmation. You cannot accept another request until it is confirmed."});
         }
 
         //find request
@@ -388,7 +396,7 @@ donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
 });
 
 
-// COMPLETE DONATION
+// MARK DONATED — donor signals they have donated; creates a PENDING record awaiting requester confirmation
 donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
@@ -419,10 +427,23 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
             return res.status(400).json({message:"You have not accepted this request"});
         }
 
-        //check if already completed
+        //check if already confirmed (fully completed)
         if(request.completedDonors.some((id)=>String(id)===String(donorId)))
         {
-            return res.status(400).json({message:"Donation already completed"});
+            return res.status(400).json({message:"Your donation has already been confirmed"});
+        }
+
+        //check if already pending confirmation on THIS request
+        if(request.pendingConfirmation.some((p)=>String(p.donorId)===String(donorId)))
+        {
+            return res.status(400).json({message:"You have already marked this donation — awaiting requester confirmation"});
+        }
+
+        //block if donor already has a pending donation on ANY other request
+        const hasPendingElsewhere=await DonationModel.exists({donorId,status:"PENDING"});
+        if(hasPendingElsewhere)
+        {
+            return res.status(400).json({message:"You have a donation awaiting confirmation on another request. Please wait for the requester to confirm before marking another donation."});
         }
 
         //get donor from db
@@ -444,12 +465,11 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
             });
         }
 
-        //calculate donation details
+        //create a PENDING donation record — points/cooldown applied only after requester confirms
         const donationDate=new Date();
         const pointsAwarded=calculatePoints(request.alertLevel);
         const nextEligibleDonationDate=calculateNextEligibleDate(donationDate);
 
-        //create donation record
         const donationRecord=await DonationModel.create({
             donorId:donor._id,
             bloodRequestId:request._id,
@@ -459,52 +479,28 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
             unitsDonated:1,
             donationDate,
             nextEligibleDonationDate,
-            status:"CONFIRMED",
-            isVerified:true
+            status:"PENDING",
+            isVerified:false
         });
 
-        //update donor stats
-        const oldBadges=donor.badges || [];
-        donor.totalPoints+=pointsAwarded;
-        donor.donationsCount+=1;
-        donor.donorLevel=calculateLevel(donor.totalPoints);
-        const newBadges=calculateBadges(donor.donationsCount,donor.totalPoints);
-        donor.badges=newBadges;
-        donor.lastDonationDate=donationDate;
-        donor.nextEligibleDonationDate=nextEligibleDonationDate;
-        donor.isAvailable=false;
-        donor.availabilityUpdatedAt=donationDate;
-        await donor.save();
-
-        //update request
-        request.completedDonors.push(donor._id);
+        //move donor from acceptedDonors to pendingConfirmation
         request.acceptedDonors=request.acceptedDonors.filter((donorObj)=>String(donorObj.donorId)!==String(donorId));
-        request.unitsFulfilled+=1;
-        if(request.unitsFulfilled>=request.unitsRequired)
-        {
-            request.status="FULFILLED";
-        }
+        request.pendingConfirmation.push({
+            donorId:donor._id,
+            donationId:donationRecord._id,
+            donatedAt:donationDate
+        });
         await request.save();
 
-        //notify donor of points earned (non-critical)
-        try
-        {
-            await createNotification(donor._id,"Donation Completed",`You earned ${pointsAwarded} points for donating blood`,"DONATION_COMPLETED");
-        }
-        catch(error)
-        {
-            console.error(error);
-        }
-
-        //notify requester of donation (non-critical)
+        //notify requester to confirm (non-critical)
         try
         {
             if(request.requestCreatedBy)
             {
                 await createNotification(
                     request.requestCreatedBy,
-                    "Blood Request Updated",
-                    `A donation has been completed for request ${request.requestNumber}`,
+                    "Donation Awaiting Confirmation",
+                    `${donor.firstName} ${donor.lastName} has donated for request ${request.requestNumber}. Please confirm their donation.`,
                     "DONATION_COMPLETED"
                 );
             }
@@ -514,26 +510,8 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
             console.error(error);
         }
 
-        //notify for each new badge earned (non-critical)
-        const earnedBadges=newBadges.filter((badge)=>!oldBadges.includes(badge));
-        for(const badge of earnedBadges)
-        {
-            try
-            {
-                await createNotification(donor._id,"New Badge Earned",`Congratulations! You earned the badge "${badge}"`,"BADGE_EARNED");
-            }
-            catch(error)
-            {
-                console.error(error);
-            }
-        }
-
-        //prepare response
-        const donorObj=donor.toObject();
-        delete donorObj.password;
-
         //send res
-        res.status(200).json({message:"Donation Completed Successfully",donation:donationRecord,donor:donorObj,request});
+        res.status(200).json({message:"Donation marked successfully. Awaiting requester confirmation.",donation:donationRecord,request});
     }
     catch(err)
     {

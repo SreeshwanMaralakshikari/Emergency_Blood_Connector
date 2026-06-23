@@ -1,10 +1,16 @@
 import exp from 'express'
 import {createNotification} from '../utils/createNotification.js'
 import {BloodRequestModel} from '../models/BloodRequestModel.js'
+import {DonationModel} from '../models/DonationModel.js'
+import {UserModel} from '../models/UserModel.js'
 import {verifyToken} from '../middlewares/verifyToken.js'
 import {calculateExpiryDate} from '../utils/requestExpiry.js'
 import {calculatePriorityScore} from '../utils/calculatePriorityScore.js'
 import {generateRequestNumber} from '../utils/generateRequestNumber.js'
+import {calculatePoints} from '../utils/calculatePoints.js'
+import {calculateLevel} from '../utils/calculateLevel.js'
+import {calculateNextEligibleDate} from '../utils/donationCooldown.js'
+import {calculateBadges} from '../utils/calculateBadges.js'
 
 export const requestApp=exp.Router();
 
@@ -124,8 +130,9 @@ requestApp.get("/request/:requestNumber",async(req,res,next)=>{
     {
         const {requestNumber}=req.params;
 
-        //find request (excluding deleted)
-        const request=await BloodRequestModel.findOne({requestNumber,status:{$ne:"DELETED"}});
+        //find request (excluding deleted) and populate donor names in pendingConfirmation
+        const request=await BloodRequestModel.findOne({requestNumber,status:{$ne:"DELETED"}})
+            .populate("pendingConfirmation.donorId","firstName lastName bloodGroup");
         if(!request)
         {
             return res.status(404).json({message:"Blood Request Not Found"});
@@ -228,6 +235,14 @@ requestApp.patch("/close-request",verifyToken("REQUESTER","ADMIN"),async(req,res
         {
             return res.status(400).json({message:"Request already closed"});
         }
+        if(request.status==="EXPIRED")
+        {
+            return res.status(400).json({message:"Expired request cannot be closed"});
+        }
+        if(request.status==="DELETED")
+        {
+            return res.status(400).json({message:"Deleted request cannot be closed"});
+        }
 
         //close request
         request.status="CLOSED";
@@ -313,6 +328,132 @@ requestApp.get("/dashboard",verifyToken("REQUESTER","ADMIN"),async(req,res,next)
         res.status(200).json({
             message:"Requester Dashboard",
             payload:{totalRequests,openRequests,fulfilledRequests,totalUnitsRequired,totalUnitsFulfilled}
+        });
+    }
+    catch(err)
+    {
+        next(err);
+    }
+});
+
+
+// CONFIRM DONATION — requester verifies that a donor actually donated at the hospital
+// This awards points, sets cooldown, and increments unitsFulfilled
+requestApp.patch("/confirm-donation",verifyToken("REQUESTER","ADMIN"),async(req,res,next)=>{
+    try
+    {
+        const {requestNumber,donorId}=req.body;
+
+        if(!requestNumber || !donorId)
+        {
+            return res.status(400).json({message:"requestNumber and donorId are required"});
+        }
+
+        //find request
+        const request=await BloodRequestModel.findOne({requestNumber});
+        if(!request)
+        {
+            return res.status(404).json({message:"Blood Request Not Found"});
+        }
+
+        //only the requester who created this request (or admin) can confirm donations
+        if(req.user.role!=="ADMIN" && String(request.requestCreatedBy)!==String(req.user.userId))
+        {
+            return res.status(403).json({message:"You are not authorized to confirm donations for this request"});
+        }
+
+        //deleted requests cannot have donations confirmed
+        if(request.status==="DELETED")
+        {
+            return res.status(400).json({message:"Cannot confirm a donation on a deleted request"});
+        }
+
+        //find this donor in the pendingConfirmation list
+        const pendingEntry=request.pendingConfirmation.find(
+            (p)=>String(p.donorId)===String(donorId)
+        );
+        if(!pendingEntry)
+        {
+            return res.status(404).json({message:"No pending donation found for this donor on this request"});
+        }
+
+        //get the pending donation record
+        const donationRecord=await DonationModel.findById(pendingEntry.donationId);
+        if(!donationRecord)
+        {
+            return res.status(404).json({message:"Donation record not found"});
+        }
+
+        //get donor
+        const donor=await UserModel.findById(donorId);
+        if(!donor)
+        {
+            return res.status(404).json({message:"Donor Not Found"});
+        }
+
+        //confirm the donation record
+        donationRecord.status="CONFIRMED";
+        donationRecord.isVerified=true;
+        await donationRecord.save();
+
+        //award points and apply donation cooldown to donor
+        const oldBadges=donor.badges || [];
+        donor.totalPoints+=donationRecord.pointsAwarded;
+        donor.donationsCount+=1;
+        donor.donorLevel=calculateLevel(donor.totalPoints);
+        const newBadges=calculateBadges(donor.donationsCount,donor.totalPoints);
+        donor.badges=newBadges;
+        donor.lastDonationDate=donationRecord.donationDate;
+        donor.nextEligibleDonationDate=donationRecord.nextEligibleDonationDate;
+        donor.isAvailable=false;
+        donor.availabilityUpdatedAt=new Date();
+        await donor.save();
+
+        //update request — move donor from pendingConfirmation to completedDonors
+        request.pendingConfirmation=request.pendingConfirmation.filter(
+            (p)=>String(p.donorId)!==String(donorId)
+        );
+        request.completedDonors.push(donor._id);
+        request.unitsFulfilled+=1;
+        if(request.unitsFulfilled>=request.unitsRequired)
+        {
+            request.status="FULFILLED";
+        }
+        await request.save();
+
+        //notify donor their donation is confirmed and points awarded (non-critical)
+        try
+        {
+            await createNotification(
+                donor._id,
+                "Donation Confirmed",
+                `Your donation for request ${request.requestNumber} has been confirmed. You earned ${donationRecord.pointsAwarded} point${donationRecord.pointsAwarded!==1?"s":""}!`,
+                "DONATION_CONFIRMED"
+            );
+        }
+        catch(error)
+        {
+            console.error(error);
+        }
+
+        //notify donor of each new badge earned (non-critical)
+        const earnedBadges=newBadges.filter((badge)=>!oldBadges.includes(badge));
+        for(const badge of earnedBadges)
+        {
+            try
+            {
+                await createNotification(donor._id,"New Badge Earned",`Congratulations! You earned the badge "${badge}"`,"BADGE_EARNED");
+            }
+            catch(error)
+            {
+                console.error(error);
+            }
+        }
+
+        //send res
+        res.status(200).json({
+            message:"Donation confirmed successfully",
+            payload:{request,donation:donationRecord}
         });
     }
     catch(err)

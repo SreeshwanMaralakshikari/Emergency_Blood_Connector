@@ -1,85 +1,85 @@
-### Request API Test
+### Request API Health Check
 GET http://localhost:5000/request-api
+
+### Get All Open Requests (public)
+GET http://localhost:5000/request-api/open-requests
+
+### Get Request Details by Number (public)
+GET http://localhost:5000/request-api/request/REQ-2026-00001
 
 ### Create Blood Request
 POST http://localhost:5000/request-api/create-request
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUwODMzMGVlNzg3MzhiNjdjNDAiLCJlbWFpbCI6InJlcXVlc3RlcjJAdGVzdC5jb20iLCJyb2xlIjoiUkVRVUVTVEVSIiwiaWF0IjoxNzgxMzY1NDIxLCJleHAiOjE3ODE5NzAyMjF9.uUXdQgO6m8nYSkSvtQ2KRUu3QyO2-ALWs3Dt6JYiXzE
+Authorization: Bearer YOUR_REQUESTER_TOKEN
 
 {
-  "patientName": "Patient Test",
-  "patientAge": 40,
+  "patientName": "Ravi Kumar",
+  "patientAge": 45,
   "patientGender": "MALE",
   "bloodGroup": "O+",
-  "unitsRequired": 1,
-  "hospitalName": "Apollo",
-  "hospitalAddress": "Hyderabad",
+  "unitsRequired": 2,
+  "hospitalName": "Apollo Hospital",
+  "hospitalAddress": "Banjara Hills, Hyderabad",
   "state": "Telangana",
-  "contactPerson": "Doctor",
-  "contactNumber": "8888888888",
-  "alertLevel": "YELLOW",
-  "requiredByDate": "2026-06-25T10:00:00.000Z"
+  "contactPerson": "Dr. Anita Rao",
+  "contactNumber": "9876543210",
+  "alertLevel": "RED",
+  "requiredByDate": "2026-07-10"
 }
-
-### Get Open Requests
-GET http://localhost:5000/request-api/open-requests
 
 ### Get My Requests
 GET http://localhost:5000/request-api/my-requests
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUwODMzMGVlNzg3MzhiNjdjNDAiLCJlbWFpbCI6InJlcXVlc3RlcjJAdGVzdC5jb20iLCJyb2xlIjoiUkVRVUVTVEVSIiwiaWF0IjoxNzgxMzU5NjcwLCJleHAiOjE3ODE5NjQ0NzB9.lW-LqPffFNDsDaTpI3lMCvR8oAA23PDn4Er665jKCFI
+Authorization: Bearer YOUR_REQUESTER_TOKEN
 
-### GET REQUEST DETAILS
-GET http://localhost:5000/request-api/request/REQ-2026-00001
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWRlZjMzMGVlNzg3MzhiNjdjM2YiLCJlbWFpbCI6InJlcXVlc3RlckB0ZXN0LmNvbSIsInJvbGUiOiJSRVFVRVNURVIiLCJpYXQiOjE3ODEzNjY2ODcsImV4cCI6MTc4MTk3MTQ4N30.6LGmDc0FlCSS8OIUwiiPkKdYYDFJXg6TfbB_Bj12JT0
-
-### UNAUTHORIZED TEST
-GET http://localhost:5000/request-api/request/REQ-2026-00001
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUwODMzMGVlNzg3MzhiNjdjNDAiLCJlbWFpbCI6InJlcXVlc3RlcjJAdGVzdC5jb20iLCJyb2xlIjoiUkVRVUVTVEVSIiwiaWF0IjoxNzgxMzY3MzQ5LCJleHAiOjE3ODE5NzIxNDl9.0rBnoSWucTdAZOpTsl_ReRuNZkggRRXT78x4H7AKTrY
-
-### INVALID REQUEST
-GET http://localhost:5000/request-api/request/REQ-9999-99999
-Cookie: token=YOUR_REQUESTER_TOKEN
-
-
-### EDIT REQUEST
+### Edit Blood Request
 PUT http://localhost:5000/request-api/edit-request
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWRlZjMzMGVlNzg3MzhiNjdjM2YiLCJlbWFpbCI6InJlcXVlc3RlckB0ZXN0LmNvbSIsInJvbGUiOiJSRVFVRVNURVIiLCJpYXQiOjE3ODEzNjc4NzIsImV4cCI6MTc4MTk3MjY3Mn0._N1cerkUkx1vnzCEiGlrR2EgkJTyaqzKm4vMMJPOEOI
+Authorization: Bearer YOUR_REQUESTER_TOKEN
 
 {
-  "requestNumber":"REQ-2026-00011",
-  "patientName":"Updated Patient",
-  "patientAge":45,
-  "patientGender":"MALE",
-  "bloodGroup":"A+",
-  "unitsRequired":2,
-  "hospitalName":"Apollo Central Hospitals",
-  "hospitalAddress":"Hyderabad",
-  "state":"Telangana",
-  "contactPerson":"Senior Doctor",
-  "contactNumber":"9999999999",
-  "alertLevel":"RED",
-  "requiredByDate":"2026-07-01T10:00:00.000Z"
+  "requestNumber": "REQ-2026-00001",
+  "patientName": "Ravi Kumar",
+  "patientAge": 46,
+  "patientGender": "MALE",
+  "bloodGroup": "O+",
+  "unitsRequired": 3,
+  "hospitalName": "Apollo Hospital",
+  "hospitalAddress": "Banjara Hills, Hyderabad",
+  "state": "Telangana",
+  "contactPerson": "Dr. Anita Rao",
+  "contactNumber": "9876543210",
+  "alertLevel": "RED",
+  "requiredByDate": "2026-07-10"
 }
 
-### CLOSE REQUEST
+### Close Blood Request
 PATCH http://localhost:5000/request-api/close-request
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUwODMzMGVlNzg3MzhiNjdjNDAiLCJlbWFpbCI6InJlcXVlc3RlcjJAdGVzdC5jb20iLCJyb2xlIjoiUkVRVUVTVEVSIiwiaWF0IjoxNzgxMzY4MjM4LCJleHAiOjE3ODE5NzMwMzh9.7PWvGVEbCXS-rc5AbCpcKR-CzP4eux6BxpVtKdsraeo
+Authorization: Bearer YOUR_REQUESTER_TOKEN
 
 {
-  "requestNumber":"REQ-2026-00009"
+  "requestNumber": "REQ-2026-00001"
 }
 
-### DELETE REQUEST
+### Delete Blood Request (soft delete)
 PATCH http://localhost:5000/request-api/delete-request
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWUwODMzMGVlNzg3MzhiNjdjNDAiLCJlbWFpbCI6InJlcXVlc3RlcjJAdGVzdC5jb20iLCJyb2xlIjoiUkVRVUVTVEVSIiwiaWF0IjoxNzgxMzY4ODc0LCJleHAiOjE3ODE5NzM2NzR9.e0Sw5emRvy-LoGDryQCmcj0ZpK1mWoKGl022icQJN5k
+Authorization: Bearer YOUR_REQUESTER_TOKEN
 
 {
-  "requestNumber":"REQ-2026-00008"
+  "requestNumber": "REQ-2026-00001"
 }
 
 ### Requester Dashboard
 GET http://localhost:5000/request-api/dashboard
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJkNWRlZjMzMGVlNzg3MzhiNjdjM2YiLCJlbWFpbCI6InJlcXVlc3RlckB0ZXN0LmNvbSIsInJvbGUiOiJSRVFVRVNURVIiLCJpYXQiOjE3ODEzNTk4MzUsImV4cCI6MTc4MTk2NDYzNX0.cmLFGI9a35IgCZoxWCUWU6U_Zbl6dCsgGcmo9IXWwYU
+Authorization: Bearer YOUR_REQUESTER_TOKEN
+
+### Confirm Donation (Requester confirms a donor actually donated)
+PATCH http://localhost:5000/request-api/confirm-donation
+Content-Type: application/json
+Authorization: Bearer YOUR_REQUESTER_TOKEN
+
+{
+  "requestNumber": "REQ-2026-00001",
+  "donorId": "DONOR_OBJECT_ID_HERE"
+}

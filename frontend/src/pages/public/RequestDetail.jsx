@@ -1,8 +1,8 @@
 //shows full details of a blood request
-//DONOR   → can Accept (if OPEN) or Complete (if already accepted)
-//REQUESTER (owner) → can Edit, Close, Delete
-//ADMIN   → can Force Close
-//Public  → read-only view
+//DONOR      → Accept (if OPEN) → Mark donated (if accepted) → pending confirmation badge
+//REQUESTER  → Confirm each pending donation / Edit / Close / Delete
+//ADMIN      → Force Close / Edit / Delete
+//Public     → read-only view
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router";
@@ -18,6 +18,7 @@ import {
   requestNumberClass, bloodGroupBadge,
   getStatusClass, getAlertClass,
   acceptBtn, completeBtn, editBtn, closeBtn, deleteBtn, forceCloseBtn,
+  successBtn,
   errorClass, loadingClass, mutedText, divider,
 } from "../../styles/common";
 import { formatDate, formatDateTime, timeAgo } from "../../utils/formatDate";
@@ -29,21 +30,22 @@ export default function RequestDetail() {
   const role                            = useSelector(selectRole);
   const isAuth                          = useSelector(selectIsAuth);
 
-  const [request, setRequest]           = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState("");
+  const [request, setRequest]             = useState(null);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState("");
   const [actionLoading, setActionLoading] = useState("");
 
-  const fetchRequest = useCallback(async () => {
+  //silent=true skips the loading screen — used for background refresh after actions
+  const fetchRequest = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError("");
       const res = await axiosInstance.get(`/request-api/request/${requestNumber}`);
       setRequest(res.data?.payload);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load request details.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [requestNumber]);
 
@@ -61,9 +63,11 @@ export default function RequestDetail() {
   const pct       = Math.min(100, Math.round((fulfilled / required) * 100));
   const isDone    = fulfilled >= required;
 
-  //determine donor's relationship to this request
+  //determine the current user's relationship to this request
   const userId       = user?.id || user?._id;
   const hasAccepted  = req.acceptedDonors?.some((d) => String(d.donorId || d) === String(userId));
+  //p.donorId is populated — compare against _id
+  const hasPending   = req.pendingConfirmation?.some((p) => String(p.donorId?._id || p.donorId) === String(userId));
   const hasCompleted = req.completedDonors?.some((d) => String(d.donorId || d) === String(userId));
   const isOwner      = String(req.requestCreatedBy?._id || req.requestCreatedBy) === String(userId);
   const isOpen       = req.status === "OPEN";
@@ -74,7 +78,7 @@ export default function RequestDetail() {
       setActionLoading("accept");
       await axiosInstance.put("/donor-api/accept-request", { requestNumber: req.requestNumber });
       toast.success("Request accepted! Head to the hospital and donate.");
-      fetchRequest();
+      fetchRequest(true);
     } catch (err) {
       toast.error(err.response?.data?.message || "Could not accept request.");
     } finally {
@@ -82,14 +86,30 @@ export default function RequestDetail() {
     }
   };
 
-  const handleComplete = async () => {
+  const handleMarkDonated = async () => {
     try {
-      setActionLoading("complete");
+      setActionLoading("markDonated");
       await axiosInstance.put("/donor-api/complete-donation", { requestNumber: req.requestNumber });
-      toast.success("Donation marked complete. Thank you for saving a life! 🩸");
-      fetchRequest();
+      toast.success("Donation marked! Waiting for the requester to confirm.");
+      fetchRequest(true);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not complete donation.");
+      toast.error(err.response?.data?.message || "Could not mark donation.");
+    } finally {
+      setActionLoading("");
+    }
+  };
+
+  const handleConfirmDonation = async (donorId) => {
+    try {
+      setActionLoading(`confirm-${donorId}`);
+      await axiosInstance.patch("/request-api/confirm-donation", {
+        requestNumber: req.requestNumber,
+        donorId,
+      });
+      toast.success("Donation confirmed! Points have been awarded to the donor.");
+      fetchRequest(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not confirm donation.");
     } finally {
       setActionLoading("");
     }
@@ -101,7 +121,7 @@ export default function RequestDetail() {
       setActionLoading("close");
       await axiosInstance.patch("/request-api/close-request", { requestNumber: req.requestNumber });
       toast.success("Request closed.");
-      fetchRequest();
+      fetchRequest(true);
     } catch (err) {
       toast.error(err.response?.data?.message || "Could not close request.");
     } finally {
@@ -129,7 +149,7 @@ export default function RequestDetail() {
       setActionLoading("forceClose");
       await axiosInstance.patch("/admin-api/force-close-request", { requestNumber: req.requestNumber });
       toast.success("Request force closed.");
-      fetchRequest();
+      fetchRequest(true);
     } catch (err) {
       toast.error(err.response?.data?.message || "Could not force close request.");
     } finally {
@@ -153,20 +173,15 @@ export default function RequestDetail() {
 
         {/* Header */}
         <div className="mb-6 flex flex-col gap-3">
-          {/* Badges row */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className={bloodGroupBadge}>{req.bloodGroup}</span>
             <span className={getAlertClass(req.alertLevel)}>{req.alertLevel}</span>
             <span className={getStatusClass(req.status)}>{req.status}</span>
           </div>
-
-          {/* Title */}
           <h1 className={requestMainTitle}>
             {req.patientName}, {req.patientAge}
             {req.patientGender ? ` · ${req.patientGender}` : ""}
           </h1>
-
-          {/* Request number */}
           <span className={requestNumberClass}>{req.requestNumber}</span>
         </div>
 
@@ -214,10 +229,11 @@ export default function RequestDetail() {
         {isAuth && (
           <div className={requestActions}>
 
-            {/* DONOR actions */}
-            {role === "DONOR" && isOpen && !hasCompleted && (
+            {/* ── DONOR ACTIONS ── */}
+            {role === "DONOR" && isOpen && (
               <>
-                {!hasAccepted && (
+                {/* 1. Not yet accepted */}
+                {!hasAccepted && !hasPending && !hasCompleted && (
                   <button
                     onClick={handleAccept}
                     disabled={!!actionLoading}
@@ -226,25 +242,89 @@ export default function RequestDetail() {
                     {busy("accept") ? "Accepting…" : "Accept request"}
                   </button>
                 )}
-                {hasAccepted && (
+
+                {/* 2. Accepted — ready to mark as donated */}
+                {hasAccepted && !hasPending && !hasCompleted && (
                   <button
-                    onClick={handleComplete}
+                    onClick={handleMarkDonated}
                     disabled={!!actionLoading}
                     className={`${completeBtn} ${actionLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                   >
-                    {busy("complete") ? "Completing…" : "Mark donation complete"}
+                    {busy("markDonated") ? "Submitting…" : "I have donated — notify requester"}
                   </button>
                 )}
               </>
             )}
 
-            {hasCompleted && (
-              <span className="text-xs font-semibold text-[#16a34a] bg-[#16a34a]/10 px-3 py-2 rounded-full">
-                ✓ You donated for this request
+            {/* 3. Marked donated — waiting for requester confirmation
+                 Shown regardless of request status (request may become FULFILLED while donor is still pending) */}
+            {role === "DONOR" && hasPending && !hasCompleted && (
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#d97706]
+                               bg-[#d97706]/10 px-3 py-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Donation submitted — awaiting requester confirmation
               </span>
             )}
 
-            {/* REQUESTER / owner actions */}
+            {/* 4. Donor fully confirmed — shown regardless of request status */}
+            {role === "DONOR" && hasCompleted && (
+              <span className="text-xs font-semibold text-[#16a34a] bg-[#16a34a]/10 px-3 py-2 rounded-full">
+                ✓ Your donation has been confirmed
+              </span>
+            )}
+
+            {/* ── PENDING CONFIRMATION PANEL ──
+                 Shown to: request owner (requester) OR any admin
+                 Shown when: there are pending donations — regardless of request status
+                 (backend allows confirming on FULFILLED requests too, for remaining pending donors) */}
+            {(isOwner || role === "ADMIN") && req.pendingConfirmation?.length > 0 && (
+              <div className="w-full bg-[#fffbeb] border border-[#fde68a] rounded-xl p-4 mb-1">
+                <p className="text-xs font-bold text-[#92400e] uppercase tracking-widest mb-3">
+                  🩸 Donations awaiting your confirmation ({req.pendingConfirmation.length})
+                </p>
+                <div className="flex flex-col gap-2">
+                  {req.pendingConfirmation.map((p) => (
+                    <div
+                      key={String(p.donorId?._id || p.donorId)}
+                      className="flex items-center justify-between bg-white rounded-lg px-4 py-3
+                                 border border-[#fde68a] gap-3 flex-wrap"
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-sm font-semibold text-[#1a1a1a]">
+                          {p.donorId?.firstName
+                            ? `${p.donorId.firstName} ${p.donorId.lastName}`
+                            : `Donor …${String(p.donorId?._id || p.donorId).slice(-6)}`}
+                          {p.donorId?.bloodGroup && (
+                            <span className="ml-2 text-xs font-normal text-[#9e9e9e]">
+                              {p.donorId.bloodGroup}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-[#9e9e9e]">
+                          Donated {p.donatedAt ? timeAgo(p.donatedAt) : "recently"}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleConfirmDonation(String(p.donorId?._id || p.donorId))}
+                        disabled={!!actionLoading}
+                        className={`${successBtn} text-xs px-4 py-1.5 ${
+                          actionLoading ? "opacity-60 cursor-not-allowed" : ""
+                        }`}
+                      >
+                        {busy(`confirm-${String(p.donorId?._id || p.donorId)}`) ? "Confirming…" : "Confirm donation"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── REQUESTER / OWNER CONTROLS ── */}
             {isOwner && isOpen && (
               <>
                 <button
@@ -271,7 +351,7 @@ export default function RequestDetail() {
               </>
             )}
 
-            {/* ADMIN actions — edit/close/delete for any request, force-close for non-owned */}
+            {/* ── ADMIN ACTIONS ── */}
             {role === "ADMIN" && !isOwner && isOpen && (
               <>
                 <button
@@ -361,7 +441,11 @@ export default function RequestDetail() {
             <p className={detailValue}>{req.acceptedDonors?.length ?? 0}</p>
           </div>
           <div>
-            <p className={detailLabel}>Completed donors</p>
+            <p className={detailLabel}>Awaiting confirmation</p>
+            <p className={detailValue}>{req.pendingConfirmation?.length ?? 0}</p>
+          </div>
+          <div>
+            <p className={detailLabel}>Confirmed donors</p>
             <p className={detailValue}>{req.completedDonors?.length ?? 0}</p>
           </div>
         </div>

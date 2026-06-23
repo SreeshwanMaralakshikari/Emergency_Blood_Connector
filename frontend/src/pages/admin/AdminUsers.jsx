@@ -27,7 +27,16 @@ function UserRow({ user, onToggle, toggling }) {
       {/* Name + avatar */}
       <td className={tableTd}>
         <div className="flex items-center gap-3">
-          <div className={`${avatar} shrink-0`}>{initials}</div>
+          {/* Show profile image if uploaded, otherwise show initials avatar */}
+          {user.profileImageUrl ? (
+            <img
+              src={user.profileImageUrl}
+              alt={initials}
+              className="w-8 h-8 rounded-full object-cover border border-[#e4e4e4] shrink-0"
+            />
+          ) : (
+            <div className={`${avatar} shrink-0`}>{initials}</div>
+          )}
           <div>
             <p className="text-sm font-semibold text-[#1a1a1a]">
               {user.firstName} {user.lastName}

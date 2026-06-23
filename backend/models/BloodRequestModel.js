@@ -88,6 +88,24 @@ const bloodRequestSchema=new Schema({
             default:Date.now
         }
     }],
+    //donors who have donated and are awaiting requester confirmation
+    pendingConfirmation:[{
+        _id:false,
+        donorId:{
+            type:Schema.Types.ObjectId,
+            ref:"user",
+            required:true
+        },
+        donationId:{
+            type:Schema.Types.ObjectId,
+            ref:"donation",
+            required:true
+        },
+        donatedAt:{
+            type:Date,
+            default:Date.now
+        }
+    }],
     completedDonors:[{
         type:Schema.Types.ObjectId,
         ref:"user"

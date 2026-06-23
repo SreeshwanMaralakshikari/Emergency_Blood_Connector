@@ -3,16 +3,21 @@ import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import {UserModel} from '../models/UserModel.js'
 import {verifyToken} from '../middlewares/verifyToken.js'
+import {upload} from '../config/multer.js'
+import {uploadToCloudinary} from '../config/cloudinaryUpload.js'
+import cloudinary from '../config/cloudinary.js'
 
 export const commonApp=exp.Router();
 
 
 // REGISTER
-commonApp.post("/register",async(req,res,next)=>{
+commonApp.post("/register",upload.single("profileImageUrl"),async(req,res,next)=>{
+    //track cloudinary upload so we can roll it back if db save fails
+    let cloudinaryResult=null;
     try
     {
         //destructure only known fields to avoid strict:throw errors
-        const {firstName,lastName,email,password,phoneNumber,bloodGroup,state,role,profileImageUrl}=req.body;
+        const {firstName,lastName,email,password,phoneNumber,bloodGroup,state,role}=req.body;
 
         //only DONOR and REQUESTER can self-register
         const allowedRoles=["DONOR","REQUESTER"];
@@ -34,12 +39,24 @@ commonApp.post("/register",async(req,res,next)=>{
             return res.status(409).json({message:"User already exists"});
         }
 
+        //upload profile image to cloudinary if provided
+        if(req.file)
+        {
+            cloudinaryResult=await uploadToCloudinary(req.file.buffer);
+        }
+
         //hash password and create user
         const hashedPassword=await bcryptjs.hash(password,10);
-        const createdUser=await UserModel.create({
+        //only include profileImageUrl when an image was actually uploaded
+        const createData={
             firstName,lastName,email,password:hashedPassword,
-            phoneNumber,bloodGroup,state,role,profileImageUrl
-        });
+            phoneNumber,bloodGroup,state,role
+        };
+        if(cloudinaryResult?.secure_url)
+        {
+            createData.profileImageUrl=cloudinaryResult.secure_url;
+        }
+        const createdUser=await UserModel.create(createData);
 
         const userObj=createdUser.toObject();
         delete userObj.password;
@@ -49,6 +66,19 @@ commonApp.post("/register",async(req,res,next)=>{
     }
     catch(err)
     {
+        //if db save failed after image was uploaded, attempt to delete it from cloudinary
+        //wrap in try/catch so a cloudinary failure does not mask the original error
+        if(cloudinaryResult?.public_id)
+        {
+            try
+            {
+                await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+            }
+            catch(cloudinaryErr)
+            {
+                console.error("cloudinary cleanup failed",cloudinaryErr.message);
+            }
+        }
         next(err);
     }
 });
