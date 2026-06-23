@@ -44,12 +44,12 @@ export default function Home() {
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
-      <section className="max-w-5xl mx-auto px-6 pt-20 pb-16">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-20 pb-10 sm:pb-16">
         <div className="max-w-2xl">
           <span className="inline-block text-[#c0152a] text-xs font-bold uppercase tracking-widest mb-4">
             Emergency Blood Connector
           </span>
-          <h1 className="text-[3.25rem] font-bold text-[#1a1a1a] tracking-tighter leading-[1.1] mb-5">
+          <h1 className="text-[2rem] sm:text-[3.25rem] font-bold text-[#1a1a1a] tracking-tighter leading-[1.1] mb-5">
             Every second counts.<br />
             Find blood, fast.
           </h1>
@@ -67,7 +67,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="max-w-5xl mx-auto px-6 py-16">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <h2 className={`${headingClass} mb-10`}>How it works</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {HOW_IT_WORKS.map((item) => (
@@ -82,7 +82,7 @@ export default function Home() {
         </div>
       </section>
       <section className="bg-white border-y border-[#e4e4e4]">
-        <div className="max-w-5xl mx-auto px-6 py-14">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <h2 className={`${headingClass} mb-2`}>Alert levels</h2>
           <p className={`${bodyText} mb-8`}>
             Requests are classified by urgency. Higher alert levels earn donors more points.
@@ -97,7 +97,7 @@ export default function Home() {
               <div key={a.level} className="bg-[#f4f4f4] rounded-xl p-5 flex flex-col gap-2">
                 <span className={`self-start text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${
                   a.level === "GREEN"  ? "bg-[#16a34a]/10 text-[#15803d]" :
-                  a.level === "YELLOW" ? "bg-[#d97706]/12 text-[#b45309]" :
+                  a.level === "YELLOW" ? "bg-[#d97706]/10 text-[#b45309]" :
                   a.level === "RED"    ? "bg-[#dc2626]/10 text-[#b91c1c]" :
                                          "bg-[#1a1a1a]/10 text-[#1a1a1a]"
                 }`}>
@@ -110,7 +110,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="max-w-5xl mx-auto px-6 py-14">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         <h2 className={`${headingClass} mb-2`}>All blood groups supported</h2>
         <p className={`${bodyText} mb-7`}>Requests and donor profiles cover all 8 ABO/Rh blood groups.</p>
         <div className="flex flex-wrap gap-3">
@@ -123,7 +123,7 @@ export default function Home() {
       </section>
       {!isAuth && (
         <section className="border-t border-[#e4e4e4] bg-[#f4f4f4]">
-          <div className="max-w-5xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
               <h2 className={`${headingClass} mb-1`}>Ready to make a difference?</h2>
               <p className={bodyText}>Join as a donor to start saving lives, or as a requester to post emergency needs.</p>

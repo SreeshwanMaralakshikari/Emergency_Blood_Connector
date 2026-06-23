@@ -99,7 +99,7 @@ export default function RequesterDashboard() {
         </div>
         {d.totalUnitsRequired > 0 && (
           <div className="bg-[#f4f4f4] rounded-xl p-5 mb-10">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center flex-wrap gap-2 mb-2">
               <p className="text-xs font-semibold text-[#9e9e9e] uppercase tracking-widest">
                 Overall units fulfilled
               </p>

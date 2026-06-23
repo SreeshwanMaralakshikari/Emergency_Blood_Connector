@@ -52,7 +52,7 @@ function MilestoneRow({ milestone, donationsCount, totalPoints }) {
 
   return (
     <div className="flex flex-col gap-2 py-4 border-b border-[#f4f4f4] last:border-0">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-base">{reached ? "✅" : "⬜"}</span>
           <span className={`text-sm font-semibold ${reached ? "text-[#1a1a1a]" : "text-[#9e9e9e]"}`}>
@@ -137,7 +137,7 @@ export default function Achievements() {
               </div>
             </div>
             <div className="bg-[#f4f4f4] rounded-xl p-6 mb-10">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <div>
                   <p className="text-xs font-semibold text-[#9e9e9e] uppercase tracking-widest mb-1">
                     Current level

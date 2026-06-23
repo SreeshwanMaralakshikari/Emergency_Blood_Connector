@@ -14,8 +14,11 @@ config();
 //create express application
 const app=exp();
 
+//filter out undefined values so a missing FRONTEND_URL env var
+//does not silently block all production requests
+const allowedOrigins=[process.env.FRONTEND_URL,"http://localhost:5173"].filter(Boolean);
 app.use(cors({
-    origin:[process.env.FRONTEND_URL,"http://localhost:5173"],
+    origin:allowedOrigins,
     credentials:true,
 }));
 

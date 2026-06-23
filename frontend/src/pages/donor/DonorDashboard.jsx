@@ -108,7 +108,7 @@ export default function DonorDashboard() {
           <StatCard label="Badges earned"     value={d.badges?.length ?? 0} />
         </div>
         <div className="bg-[#f4f4f4] rounded-xl p-6 mb-10">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-[#9e9e9e] uppercase tracking-widest mb-1">
                 Donation eligibility
@@ -163,7 +163,7 @@ export default function DonorDashboard() {
         </div>
 
         <div className={divider} />
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2 className={sectionTitle}>Leaderboard</h2>
             <p className={`${mutedText} mt-1`}>

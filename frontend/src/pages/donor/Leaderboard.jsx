@@ -109,7 +109,7 @@ export default function Leaderboard() {
         {/* My rank card */}
         {isAuth && role === "DONOR" && myRank && (
           <div className="bg-[#c0152a]/[0.04] border border-[#c0152a]/[0.14]
-                          rounded-xl p-5 mb-8 flex items-center justify-between flex-wrap gap-4">
+                          rounded-xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-[#9e9e9e] uppercase tracking-widest mb-1">
                 Your rank

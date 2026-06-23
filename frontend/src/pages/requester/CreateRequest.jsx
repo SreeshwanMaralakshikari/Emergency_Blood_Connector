@@ -69,7 +69,7 @@ export default function CreateRequest() {
   const selectCls = (field) => `${selectClass} ${errors[field] ? "border-[#dc2626]" : ""}`;
 
   return (
-    <div className={`${pageBackground} py-14 px-4`}>
+    <div className={`${pageBackground} py-8 sm:py-14 px-4`}>
       <div className={formCard}>
 
         {/* Header */}
@@ -218,7 +218,7 @@ export default function CreateRequest() {
               GREEN = routine · YELLOW = moderate · RED = critical · BLACK = catastrophic
             </p>
           </div>
-          <div className="flex gap-3 mt-8">
+          <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <button
               type="submit"
               disabled={loading}

@@ -1,11 +1,11 @@
 export const pageBackground = "bg-[#fafafa] min-h-screen";
-export const pageWrapper    = "max-w-5xl mx-auto px-6 py-14";
+export const pageWrapper    = "max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14";
 export const section        = "mb-12";
 
 export const cardClass =
   "bg-[#f4f4f4] rounded-xl p-6 hover:bg-[#ececec] transition-colors duration-200 cursor-pointer";
 
-export const pageTitleClass  = "text-[2.75rem] font-bold text-[#1a1a1a] tracking-tighter leading-none mb-2";
+export const pageTitleClass  = "text-[1.9rem] sm:text-[2.75rem] font-bold text-[#1a1a1a] tracking-tighter leading-none mb-2";
 export const headingClass    = "text-2xl font-bold text-[#1a1a1a] tracking-tight";
 export const subHeadingClass = "text-lg font-semibold text-[#1a1a1a] tracking-tight";
 export const bodyText        = "text-[#6b6b6b] leading-relaxed text-[0.95rem]";
@@ -40,7 +40,7 @@ export const warningBtn =
 export const neutralBtn =
   "bg-[#525252] text-white font-semibold px-5 py-2 rounded-full hover:bg-[#404040] transition-colors cursor-pointer text-sm";
 
-export const formCard  = "bg-[#f4f4f4] rounded-2xl p-10 max-w-4xl mx-auto";
+export const formCard  = "bg-[#f4f4f4] rounded-2xl p-6 sm:p-10 max-w-4xl mx-auto";
 export const formTitle = "text-2xl font-bold text-[#1a1a1a] tracking-tight text-center mb-7";
 
 export const labelClass =
@@ -62,10 +62,10 @@ export const submitBtn =
   "w-full bg-[#c0152a] text-white font-semibold py-2.5 rounded-full hover:bg-[#960f20] transition-colors cursor-pointer mt-2 text-sm tracking-tight";
 
 export const navbarClass =
-  "bg-white/90 backdrop-blur-md border-b border-[#e4e4e4] px-8 h-[54px] flex items-center sticky top-0 z-50";
+  "bg-white/90 backdrop-blur-md border-b border-[#e4e4e4] px-4 sm:px-8 h-[54px] flex items-center sticky top-0 z-50";
 export const navContainerClass  = "max-w-5xl mx-auto w-full flex items-center justify-between";
 export const navBrandClass      = "text-[0.95rem] font-bold text-[#1a1a1a] tracking-tight";
-export const navLinksClass      = "flex items-center gap-7";
+export const navLinksClass      = "hidden md:flex items-center gap-7";
 export const navLinkClass       = "text-[0.8rem] text-[#6b6b6b] hover:text-[#1a1a1a] transition-colors font-normal";
 export const navLinkActiveClass = "text-[0.8rem] text-[#c0152a] font-semibold";
 
@@ -81,9 +81,9 @@ export const timestampClass   = "text-xs text-[#9e9e9e] flex items-center gap-1.
 export const requestNumberClass =
   "font-mono text-[0.7rem] font-semibold text-[#6b6b6b] tracking-widest bg-white px-2 py-0.5 rounded border border-[#e4e4e4]";
 
-export const requestPageWrapper = "max-w-3xl mx-auto px-6 py-12";
+export const requestPageWrapper = "max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12";
 export const requestHeader      = "mb-10 flex flex-col gap-4";
-export const requestMainTitle   = "text-4xl font-bold text-[#1a1a1a] leading-tight tracking-tighter";
+export const requestMainTitle   = "text-2xl sm:text-4xl font-bold text-[#1a1a1a] leading-tight tracking-tighter";
 export const requestMetaRow     =
   "flex items-center justify-between border-t border-b border-[#e4e4e4] py-4 text-sm text-[#6b6b6b]";
 export const requestInfoRow     = "flex items-center gap-2 font-medium text-[#1a1a1a]";
@@ -300,7 +300,7 @@ export const tabItem       =
 export const tabItemActive =
   "text-sm font-semibold text-[#c0152a] px-4 py-2.5 border-b-2 border-[#c0152a] -mb-px cursor-pointer";
 
-export const sectionHeader = "flex items-center justify-between mb-6";
+export const sectionHeader = "flex items-center justify-between flex-wrap gap-3 mb-6";
 export const sectionTitle  = "text-xl font-bold text-[#1a1a1a] tracking-tight";
 
 export const errorClass =

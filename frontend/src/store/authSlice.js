@@ -62,6 +62,10 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    //update user in Redux store after profile edit without re-fetching
+    updateUser: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
+    },
   },
   extraReducers: (builder) => {
 
@@ -111,7 +115,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, updateUser } = authSlice.actions;
 
 export const selectUser        = (state) => state.auth.user;
 export const selectRole        = (state) => state.auth.role;

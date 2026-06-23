@@ -39,6 +39,11 @@ import AdminUsers      from "./pages/admin/AdminUsers";
 import AdminRequests   from "./pages/admin/AdminRequests";
 import AdminStatistics from "./pages/admin/AdminStatistics";
 
+// Profile
+import Profile        from "./pages/profile/Profile";
+import EditProfile    from "./pages/profile/EditProfile";
+import ChangePassword from "./pages/profile/ChangePassword";
+
 export default function App() {
   const dispatch = useDispatch();
   const isAuth   = useSelector(selectIsAuth);
@@ -140,6 +145,21 @@ export default function App() {
         <Route path="/admin/statistics" element={
           <ProtectedRoute allowedRoles={["ADMIN"]}>
             <AdminStatistics />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile/edit" element={
+          <ProtectedRoute>
+            <EditProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile/change-password" element={
+          <ProtectedRoute>
+            <ChangePassword />
           </ProtectedRoute>
         } />
         <Route path="*" element={

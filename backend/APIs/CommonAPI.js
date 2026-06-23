@@ -169,6 +169,124 @@ commonApp.get("/logout",(req,res)=>{
 });
 
 
+
+
+// UPDATE PROFILE
+commonApp.patch("/update-profile",upload.single("profileImageUrl"),verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
+    let cloudinaryResult=null;
+    try
+    {
+        const userId=req.user.userId;
+        const {firstName,lastName,phoneNumber,state}=req.body;
+
+        //get user from db
+        const user=await UserModel.findById(userId);
+        if(!user)
+        {
+            return res.status(404).json({message:"User Not Found"});
+        }
+
+        //upload new profile image if provided
+        if(req.file)
+        {
+            cloudinaryResult=await uploadToCloudinary(req.file.buffer);
+            //delete old image from cloudinary if one existed
+            if(user.profileImageUrl)
+            {
+                //extract public_id from the existing URL
+                const urlParts=user.profileImageUrl.split("/");
+                const filenameWithExt=urlParts[urlParts.length-1];
+                const folder=urlParts[urlParts.length-2];
+                const publicId=`${folder}/${filenameWithExt.split(".")[0]}`;
+                try
+                {
+                    await cloudinary.uploader.destroy(publicId);
+                }
+                catch(err)
+                {
+                    console.error("old image cleanup failed",err.message);
+                }
+            }
+        }
+
+        //update only provided fields
+        if(firstName)  user.firstName=firstName;
+        if(lastName)   user.lastName=lastName;
+        if(phoneNumber) user.phoneNumber=phoneNumber;
+        if(state)      user.state=state;
+        if(cloudinaryResult?.secure_url) user.profileImageUrl=cloudinaryResult.secure_url;
+
+        await user.save();
+
+        const userObj=user.toObject();
+        delete userObj.password;
+
+        //send res
+        res.status(200).json({message:"Profile updated successfully",payload:userObj});
+    }
+    catch(err)
+    {
+        //if db save failed after image upload, attempt rollback
+        if(cloudinaryResult?.public_id)
+        {
+            try
+            {
+                await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+            }
+            catch(cloudinaryErr)
+            {
+                console.error("cloudinary cleanup failed",cloudinaryErr.message);
+            }
+        }
+        next(err);
+    }
+});
+
+
+// CHANGE PASSWORD
+commonApp.patch("/change-password",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
+    try
+    {
+        const userId=req.user.userId;
+        const {currentPassword,newPassword}=req.body;
+
+        if(!currentPassword || !newPassword)
+        {
+            return res.status(400).json({message:"Current password and new password are required"});
+        }
+        if(newPassword.trim().length<6)
+        {
+            return res.status(400).json({message:"New password must be at least 6 characters"});
+        }
+
+        //get user from db
+        const user=await UserModel.findById(userId);
+        if(!user)
+        {
+            return res.status(404).json({message:"User Not Found"});
+        }
+
+        //verify current password
+        const passwordMatched=await bcryptjs.compare(currentPassword,user.password);
+        if(!passwordMatched)
+        {
+            return res.status(401).json({message:"Current password is incorrect"});
+        }
+
+        //hash and save new password
+        user.password=await bcryptjs.hash(newPassword,10);
+        await user.save();
+
+        //send res
+        res.status(200).json({message:"Password changed successfully"});
+    }
+    catch(err)
+    {
+        next(err);
+    }
+});
+
+
 // HEALTH CHECK
 commonApp.get("/",(req,res)=>{
     res.json({message:"Common API Working"});

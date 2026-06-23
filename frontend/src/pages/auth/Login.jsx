@@ -73,7 +73,7 @@ export default function Login() {
   };
 
   return (
-    <div className={`${pageBackground} flex items-center justify-center py-16 px-4`}>
+    <div className={`${pageBackground} flex items-center justify-center py-8 sm:py-16 px-4`}>
       <div className="w-full max-w-md">
 
         {/* Header */}

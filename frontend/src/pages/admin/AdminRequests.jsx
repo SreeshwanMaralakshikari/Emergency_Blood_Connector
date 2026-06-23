@@ -23,73 +23,40 @@ const TABS = [
 function RequestRow({ req, onForceClose, forcing }) {
   const navigate   = useNavigate();
   const isOpen     = req.status === "OPEN";
-  const isForcible = isOpen;
-
   return (
     <tr className={tableTr}>
-      {/* Request number */}
       <td className={tableTd}>
-        <button
-          onClick={() => navigate(`/requests/${req.requestNumber}`)}
-          className={`${requestNumberClass} cursor-pointer hover:text-[#c0152a] transition-colors`}
-        >
+        <button onClick={() => navigate(`/requests/${req.requestNumber}`)}
+                className={`${requestNumberClass} cursor-pointer hover:text-[#c0152a] transition-colors`}>
           {req.requestNumber}
         </button>
       </td>
-
-      {/* Blood group */}
       <td className={tableTd}>
         <span className={bloodGroupBadge} style={{ fontSize: "0.72rem", padding: "2px 8px" }}>
           {req.bloodGroup}
         </span>
       </td>
-
-      {/* Patient */}
       <td className={tableTd}>
         <p className="text-sm font-semibold text-[#1a1a1a]">{req.patientName}</p>
         <p className="text-xs text-[#9e9e9e]">{req.hospitalName}</p>
       </td>
-
-      {/* State */}
       <td className={tableTdMuted}>{req.state}</td>
-
-      {/* Alert */}
-      <td className={tableTd}>
-        <span className={getAlertClass(req.alertLevel)}>{req.alertLevel}</span>
-      </td>
-
-      {/* Status */}
-      <td className={tableTd}>
-        <span className={getStatusClass(req.status)}>{req.status}</span>
-      </td>
-
-      {/* Units */}
-      <td className={tableTdMuted}>
-        {req.unitsFulfilled ?? 0} / {req.unitsRequired ?? 0}
-      </td>
-
-      {/* Created */}
+      <td className={tableTd}><span className={getAlertClass(req.alertLevel)}>{req.alertLevel}</span></td>
+      <td className={tableTd}><span className={getStatusClass(req.status)}>{req.status}</span></td>
+      <td className={tableTdMuted}>{req.unitsFulfilled ?? 0} / {req.unitsRequired ?? 0}</td>
       <td className={tableTdMuted}>{timeAgo(req.createdAt)}</td>
-
-      {/* Actions */}
       <td className={tableTd}>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/requests/${req.requestNumber}`)}
-            className="text-xs font-semibold text-[#0369a1] hover:text-[#075985]
-                       transition-colors cursor-pointer"
-          >
+          <button onClick={() => navigate(`/requests/${req.requestNumber}`)}
+                  className="text-xs font-semibold text-[#0369a1] hover:text-[#075985] transition-colors cursor-pointer">
             View
           </button>
-          {isForcible && (
-            <button
-              onClick={() => onForceClose(req.requestNumber)}
-              disabled={forcing === req.requestNumber}
-              className={`text-xs font-semibold text-[#dc2626] hover:text-[#b91c1c]
-                          transition-colors cursor-pointer ${
-                forcing === req.requestNumber ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
+          {isOpen && (
+            <button onClick={() => onForceClose(req.requestNumber)}
+                    disabled={forcing === req.requestNumber}
+                    className={`text-xs font-semibold text-[#dc2626] hover:text-[#b91c1c] transition-colors cursor-pointer ${
+                      forcing === req.requestNumber ? "opacity-50 cursor-not-allowed" : ""
+                    }`}>
               {forcing === req.requestNumber ? "Closing…" : "Force close"}
             </button>
           )}
@@ -99,14 +66,62 @@ function RequestRow({ req, onForceClose, forcing }) {
   );
 }
 
+// Mobile card
+function RequestCard({ req, onForceClose, forcing }) {
+  const navigate = useNavigate();
+  const isOpen   = req.status === "OPEN";
+  return (
+    <div className="bg-white border border-[#e4e4e4] rounded-xl p-4 flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <button onClick={() => navigate(`/requests/${req.requestNumber}`)}
+                  className={`${requestNumberClass} self-start cursor-pointer hover:text-[#c0152a]`}>
+            {req.requestNumber}
+          </button>
+          <p className="text-sm font-semibold text-[#1a1a1a]">{req.patientName}</p>
+          <p className="text-xs text-[#9e9e9e]">{req.hospitalName} · {req.state}</p>
+        </div>
+        <span className={bloodGroupBadge} style={{ fontSize: "0.72rem", padding: "2px 8px", whiteSpace: "nowrap" }}>
+          {req.bloodGroup}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <span className={getAlertClass(req.alertLevel)}>{req.alertLevel}</span>
+        <span className={getStatusClass(req.status)}>{req.status}</span>
+        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#6b6b6b]">
+          {req.unitsFulfilled ?? 0}/{req.unitsRequired ?? 0} units
+        </span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-[#9e9e9e]">{timeAgo(req.createdAt)}</span>
+        <div className="flex gap-3">
+          <button onClick={() => navigate(`/requests/${req.requestNumber}`)}
+                  className="text-xs font-semibold text-[#0369a1] hover:text-[#075985] transition-colors cursor-pointer">
+            View
+          </button>
+          {isOpen && (
+            <button onClick={() => onForceClose(req.requestNumber)}
+                    disabled={forcing === req.requestNumber}
+                    className={`text-xs font-semibold text-[#dc2626] hover:text-[#b91c1c] transition-colors cursor-pointer ${
+                      forcing === req.requestNumber ? "opacity-50 cursor-not-allowed" : ""
+                    }`}>
+              {forcing === req.requestNumber ? "Closing…" : "Force close"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminRequests() {
   const [requests, setRequests]   = useState([]);
   const [filtered, setFiltered]   = useState([]);
-  const [tab, setTab]             = useState("all");
-  const [search, setSearch]       = useState("");
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState("");
-  const [forcing, setForcing]     = useState("");
+  const [tab,      setTab]        = useState("all");
+  const [search,   setSearch]     = useState("");
+  const [loading,  setLoading]    = useState(true);
+  const [error,    setError]      = useState("");
+  const [forcing,  setForcing]    = useState("");
 
   const fetchRequests = useCallback(async (endpoint) => {
     try {
@@ -126,7 +141,6 @@ export default function AdminRequests() {
     if (t) fetchRequests(t.endpoint);
   }, [tab, fetchRequests]);
 
-  //client-side search
   useEffect(() => {
     if (!search.trim()) { setFiltered(requests); return; }
     const q = search.toLowerCase();
@@ -145,7 +159,6 @@ export default function AdminRequests() {
       setForcing(requestNumber);
       await axiosInstance.patch("/admin-api/force-close-request", { requestNumber });
       toast.success("Request force closed.");
-      //if on the open tab, remove it from the list; otherwise update status
       setRequests((prev) =>
         tab === "open"
           ? prev.filter((r) => r.requestNumber !== requestNumber)
@@ -162,7 +175,6 @@ export default function AdminRequests() {
     <div className={pageBackground}>
       <div className={pageWrapper}>
 
-        {/* Header */}
         <div className="mb-8">
           <p className="text-[#c0152a] text-xs font-bold uppercase tracking-widest mb-2">
             Admin · Requests
@@ -173,31 +185,23 @@ export default function AdminRequests() {
           </p>
         </div>
 
-        {/* Tabs + search */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex gap-1 border-b border-[#e4e4e4] overflow-x-auto">
             {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => { setTab(t.key); setSearch(""); }}
-                className={`text-sm px-4 py-2.5 border-b-2 -mb-px cursor-pointer
-                            whitespace-nowrap transition-colors ${
-                  tab === t.key
-                    ? "font-semibold text-[#c0152a] border-[#c0152a]"
-                    : "font-medium text-[#6b6b6b] border-transparent hover:text-[#1a1a1a]"
-                }`}
-              >
+              <button key={t.key} onClick={() => { setTab(t.key); setSearch(""); }}
+                      className={`text-sm px-4 py-2.5 border-b-2 -mb-px cursor-pointer
+                                  whitespace-nowrap transition-colors ${
+                        tab === t.key
+                          ? "font-semibold text-[#c0152a] border-[#c0152a]"
+                          : "font-medium text-[#6b6b6b] border-transparent hover:text-[#1a1a1a]"
+                      }`}>
                 {t.label}
               </button>
             ))}
           </div>
-          <input
-            type="text"
-            placeholder="Search requests…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`${inputClass} max-w-xs`}
-          />
+          <input type="text" placeholder="Search requests…"
+                 value={search} onChange={(e) => setSearch(e.target.value)}
+                 className={`${inputClass} sm:max-w-xs`} />
         </div>
 
         {!loading && (
@@ -208,35 +212,38 @@ export default function AdminRequests() {
 
         {loading && <p className={loadingClass}>Loading requests…</p>}
         {error   && <div className={errorClass}>{error}</div>}
-
         {!loading && !error && filtered.length === 0 && (
           <p className={emptyStateClass}>No requests found.</p>
         )}
 
-        {/* Table */}
         {!loading && filtered.length > 0 && (
-          <div className={tableWrapper}>
-            <table className={tableClass}>
-              <thead className={tableHead}>
-                <tr>
-                  {["Request no.", "Blood", "Patient · Hospital", "State",
-                    "Alert", "Status", "Units", "Created", "Actions"].map((h) => (
-                    <th key={h} className={tableTh}>{h}</th>
+          <>
+            {/* Desktop table */}
+            <div className={`${tableWrapper} hidden sm:block`}>
+              <table className={tableClass}>
+                <thead className={tableHead}>
+                  <tr>
+                    {["Request no.", "Blood", "Patient · Hospital", "State",
+                      "Alert", "Status", "Units", "Created", "Actions"].map((h) => (
+                      <th key={h} className={tableTh}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((r) => (
+                    <RequestRow key={r._id} req={r} onForceClose={handleForceClose} forcing={forcing} />
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => (
-                  <RequestRow
-                    key={r._id}
-                    req={r}
-                    onForceClose={handleForceClose}
-                    forcing={forcing}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="flex flex-col gap-3 sm:hidden">
+              {filtered.map((r) => (
+                <RequestCard key={r._id} req={r} onForceClose={handleForceClose} forcing={forcing} />
+              ))}
+            </div>
+          </>
         )}
 
       </div>

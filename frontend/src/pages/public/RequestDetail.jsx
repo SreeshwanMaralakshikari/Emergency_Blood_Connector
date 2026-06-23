@@ -187,7 +187,7 @@ export default function RequestDetail() {
 
         {/* Meta row */}
         <div className={requestMetaRow}>
-          <div className="flex items-center gap-6 flex-wrap text-sm text-[#6b6b6b]">
+          <div className="flex items-center gap-3 sm:gap-6 flex-wrap text-sm text-[#6b6b6b]">
             <span>📍 {req.hospitalName}, {req.state}</span>
             <span>🕐 {timeAgo(req.createdAt)}</span>
             {req.requiredByDate && (
@@ -291,8 +291,8 @@ export default function RequestDetail() {
                   {req.pendingConfirmation.map((p) => (
                     <div
                       key={String(p.donorId?._id || p.donorId)}
-                      className="flex items-center justify-between bg-white rounded-lg px-4 py-3
-                                 border border-[#fde68a] gap-3 flex-wrap"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between bg-white rounded-lg px-4 py-3
+                                 border border-[#fde68a] gap-3"
                     >
                       <div className="flex flex-col gap-0.5">
                         <p className="text-sm font-semibold text-[#1a1a1a]">

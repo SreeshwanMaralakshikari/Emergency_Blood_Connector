@@ -56,13 +56,20 @@ requestApp.post("/create-request",verifyToken("REQUESTER","ADMIN"),async(req,res
         //save to db
         const createdRequest=await BloodRequestModel.create(bloodRequestData);
 
-        //notify requester
-        await createNotification(
-            req.user.userId,
-            "Blood Request Created",
-            `Request ${requestNumber} has been created successfully`,
-            "REQUEST_CREATED"
-        );
+        //notify requester (non-critical — request is already saved)
+        try
+        {
+            await createNotification(
+                req.user.userId,
+                "Blood Request Created",
+                `Request ${requestNumber} has been created successfully`,
+                "REQUEST_CREATED"
+            );
+        }
+        catch(notifErr)
+        {
+            console.error("create-request notification failed",notifErr.message);
+        }
 
         //send res
         res.status(201).json({message:"Blood Request Created Successfully",payload:createdRequest});
@@ -194,8 +201,15 @@ requestApp.put("/edit-request",verifyToken("REQUESTER","ADMIN"),async(req,res,ne
         request.expiresAt=calculateExpiryDate(alertLevel);
         await request.save();
 
-        //notify requester
-        await createNotification(req.user.userId,"Blood Request Updated",`Request ${requestNumber} has been updated`,"GENERAL");
+        //notify requester (non-critical — request is already saved)
+        try
+        {
+            await createNotification(req.user.userId,"Blood Request Updated",`Request ${requestNumber} has been updated`,"GENERAL");
+        }
+        catch(notifErr)
+        {
+            console.error("edit-request notification failed",notifErr.message);
+        }
 
         //send res
         res.status(200).json({message:"Blood Request Updated Successfully",payload:request});
@@ -248,8 +262,15 @@ requestApp.patch("/close-request",verifyToken("REQUESTER","ADMIN"),async(req,res
         request.status="CLOSED";
         await request.save();
 
-        //notify requester
-        await createNotification(req.user.userId,"Blood Request Closed",`Request ${requestNumber} has been closed`,"GENERAL");
+        //notify requester (non-critical — request is already saved)
+        try
+        {
+            await createNotification(req.user.userId,"Blood Request Closed",`Request ${requestNumber} has been closed`,"GENERAL");
+        }
+        catch(notifErr)
+        {
+            console.error("close-request notification failed",notifErr.message);
+        }
 
         //send res
         res.status(200).json({message:"Blood Request Closed Successfully",payload:request});
@@ -294,8 +315,15 @@ requestApp.patch("/delete-request",verifyToken("REQUESTER","ADMIN"),async(req,re
         request.status="DELETED";
         await request.save();
 
-        //notify requester
-        await createNotification(req.user.userId,"Blood Request Deleted",`Request ${requestNumber} has been deleted`,"GENERAL");
+        //notify requester (non-critical — request is already saved)
+        try
+        {
+            await createNotification(req.user.userId,"Blood Request Deleted",`Request ${requestNumber} has been deleted`,"GENERAL");
+        }
+        catch(notifErr)
+        {
+            console.error("delete-request notification failed",notifErr.message);
+        }
 
         //send res
         res.status(200).json({message:"Blood Request Deleted Successfully",payload:request});

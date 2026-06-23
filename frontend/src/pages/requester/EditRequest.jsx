@@ -124,7 +124,7 @@ export default function EditRequest() {
   );
 
   return (
-    <div className={`${pageBackground} py-14 px-4`}>
+    <div className={`${pageBackground} py-8 sm:py-14 px-4`}>
       <div className={formCard}>
 
         {/* Header */}
@@ -272,7 +272,7 @@ export default function EditRequest() {
               GREEN = routine · YELLOW = moderate · RED = critical · BLACK = catastrophic
             </p>
           </div>
-          <div className="flex gap-3 mt-8">
+          <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <button
               type="submit"
               disabled={loading}
