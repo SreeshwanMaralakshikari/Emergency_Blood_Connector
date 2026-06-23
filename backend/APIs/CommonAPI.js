@@ -66,6 +66,8 @@ commonApp.post("/register",upload.single("profileImageUrl"),async(req,res,next)=
     }
     catch(err)
     {
+        //log the real error so it appears in Render logs
+        console.error("REGISTER ERROR:",err?.name,err?.message);
         //if db save failed after image was uploaded, attempt to delete it from cloudinary
         //wrap in try/catch so a cloudinary failure does not mask the original error
         if(cloudinaryResult?.public_id)

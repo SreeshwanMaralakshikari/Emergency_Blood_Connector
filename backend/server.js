@@ -95,6 +95,7 @@ app.use((err,req,res,next)=>{
         }
         return res.status(409).json({message:"error occurred",error:"Duplicate key error"});
     }
-    //send server side error
-    res.status(500).json({message:"error occurred",error:"Server side error"});
+    //send server side error — include message in non-production for debugging
+    console.error("UNHANDLED ERROR:",err?.name,err?.message,err?.stack);
+    res.status(500).json({message:"error occurred",error:process.env.NODE_ENV==="production" ? "Server side error" : (err?.message || "Server side error")});
 });
