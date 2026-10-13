@@ -70,7 +70,7 @@ function toRows(data) {
   if (!data) return [];
   if (Array.isArray(data)) {
     return data.map((item) => ({
-      label: item._id || item.label || String(item),
+      label: item._id ?? item.label ?? "Not specified",
       count: item.count ?? 0,
     })).sort((a, b) => b.count - a.count);
   }

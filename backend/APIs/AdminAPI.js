@@ -3,6 +3,7 @@ import {verifyToken} from '../middlewares/verifyToken.js'
 import {UserModel} from '../models/UserModel.js'
 import {BloodRequestModel} from '../models/BloodRequestModel.js'
 import {DonationModel} from '../models/DonationModel.js'
+import {restoreEligibleDonors} from '../utils/donationCooldown.js'
 
 export const adminApp=exp.Router();
 
@@ -11,6 +12,9 @@ export const adminApp=exp.Router();
 adminApp.get("/users",verifyToken("ADMIN"),async(req,res,next)=>{
     try
     {
+        //end any finished donation cooldowns so availability is current
+        await restoreEligibleDonors();
+
         //read all users
         const users=await UserModel.find().select("-password").sort({createdAt:-1});
 
@@ -28,6 +32,9 @@ adminApp.get("/users",verifyToken("ADMIN"),async(req,res,next)=>{
 adminApp.get("/donors",verifyToken("ADMIN"),async(req,res,next)=>{
     try
     {
+        //end any finished donation cooldowns so availability is current
+        await restoreEligibleDonors();
+
         //read all donors
         const donors=await UserModel.find({role:"DONOR"}).select("-password").sort({createdAt:-1});
 
@@ -62,6 +69,9 @@ adminApp.get("/requesters",verifyToken("ADMIN"),async(req,res,next)=>{
 adminApp.post("/user-details",verifyToken("ADMIN"),async(req,res,next)=>{
     try
     {
+        //end any finished donation cooldowns so availability is current
+        await restoreEligibleDonors();
+
         const {userId}=req.body;
         if(!userId)
         {
@@ -269,6 +279,9 @@ adminApp.patch("/force-close-request",verifyToken("ADMIN"),async(req,res,next)=>
 adminApp.get("/dashboard",verifyToken("ADMIN"),async(req,res,next)=>{
     try
     {
+        //end any finished donation cooldowns so availability is current
+        await restoreEligibleDonors();
+
         //get user counts
         const totalUsers=await UserModel.countDocuments();
         const totalDonors=await UserModel.countDocuments({role:"DONOR"});
@@ -310,12 +323,14 @@ adminApp.get("/statistics",verifyToken("ADMIN"),async(req,res,next)=>{
     {
         //blood group distribution across all users
         const bloodGroupStats=await UserModel.aggregate([
+            {$match:{bloodGroup:{$in:["O+","O-","A+","A-","B+","B-","AB+","AB-"]}}},
             {$group:{_id:"$bloodGroup",count:{$sum:1}}},
             {$sort:{_id:1}}
         ]);
 
         //state-wise user distribution
         const stateStats=await UserModel.aggregate([
+            {$match:{state:{$nin:[null,""]}}},
             {$group:{_id:"$state",count:{$sum:1}}},
             {$sort:{count:-1}}
         ]);

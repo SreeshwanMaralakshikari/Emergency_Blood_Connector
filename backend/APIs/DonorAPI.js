@@ -5,7 +5,7 @@ import {BloodRequestModel} from '../models/BloodRequestModel.js'
 import {DonationModel} from '../models/DonationModel.js'
 import {calculatePoints} from '../utils/calculatePoints.js'
 import {calculateLevel} from '../utils/calculateLevel.js'
-import {calculateNextEligibleDate} from '../utils/donationCooldown.js'
+import {calculateNextEligibleDate,restoreEligibleDonors} from '../utils/donationCooldown.js'
 import {canDonate} from '../utils/bloodCompatibility.js'
 import {calculateBadges} from '../utils/calculateBadges.js'
 import {createNotification} from '../utils/createNotification.js'
@@ -253,6 +253,9 @@ donorApp.get("/achievements",verifyToken("DONOR"),async(req,res,next)=>{
 donorApp.get("/dashboard",verifyToken("DONOR"),async(req,res,next)=>{
     try
     {
+        //end any finished donation cooldowns before reading the donor
+        await restoreEligibleDonors();
+
         //get donor from db
         const donor=await UserModel.findById(req.user.userId).select("-password");
         if(!donor)
@@ -304,6 +307,9 @@ donorApp.put("/accept-request",verifyToken("DONOR"),async(req,res,next)=>{
     {
         const {requestNumber}=req.body;
         const donorId=req.user.userId;
+
+        //end any finished donation cooldowns before checking eligibility
+        await restoreEligibleDonors();
 
         //get donor from db
         const donor=await UserModel.findById(donorId);
@@ -402,6 +408,9 @@ donorApp.put("/complete-donation",verifyToken("DONOR"),async(req,res,next)=>{
     {
         const {requestNumber}=req.body;
         const donorId=req.user.userId;
+
+        //end any finished donation cooldowns before checking eligibility
+        await restoreEligibleDonors();
 
         //find request
         const request=await BloodRequestModel.findOne({requestNumber});

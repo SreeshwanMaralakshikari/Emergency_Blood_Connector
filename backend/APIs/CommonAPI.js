@@ -6,6 +6,7 @@ import {verifyToken} from '../middlewares/verifyToken.js'
 import {upload} from '../config/multer.js'
 import {uploadToCloudinary} from '../config/cloudinaryUpload.js'
 import cloudinary from '../config/cloudinary.js'
+import {restoreEligibleDonors} from '../utils/donationCooldown.js'
 
 export const commonApp=exp.Router();
 
@@ -92,6 +93,9 @@ commonApp.post("/login",async(req,res,next)=>{
     {
         const userCred=req.body;
 
+        //end any finished donation cooldowns before reading the user
+        await restoreEligibleDonors();
+
         //find user by email
         const dbUser=await UserModel.findOne({email:userCred.email});
         if(!dbUser)
@@ -146,6 +150,9 @@ commonApp.post("/login",async(req,res,next)=>{
 commonApp.get("/check-auth",verifyToken("DONOR","REQUESTER","ADMIN"),async(req,res,next)=>{
     try
     {
+        //end any finished donation cooldowns before reading the user
+        await restoreEligibleDonors();
+
         const dbUser=await UserModel.findById(req.user.userId).select("-password");
         if(!dbUser)
         {
